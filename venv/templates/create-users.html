@@ -1,0 +1,126 @@
+<style>
+    html {
+        background-color: rgb(59, 72, 75);
+    }
+
+    table {
+        font-family: arial, sans-serif;
+        border-collapse: collapse;
+        width: 100%;
+        align-self: center; 
+    }
+
+    tr {
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+
+    th {
+        background-color: white;
+        color: rgb(2, 189, 202);
+        text-align: left;
+        padding: 8px;
+    }
+
+    td {
+        text-align: left;
+        padding: 8px;
+    }
+
+    tr:nth-child(odd) {
+        background-color: #eefeff;
+    }
+
+    tr:hover {
+        background-color: rgb(5,129,162);
+    }
+
+    body {
+        background-color: rgb(233, 240, 241);
+    }
+
+    #container {
+        padding: 15px;
+    }
+
+    #table-div {
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+
+    .searchBar {
+        border-radius: 10px;
+        height: 30px;
+        outline: none;
+    }
+
+    .md-form.mt-0 {
+        display:flex;
+        align-items: center;
+    }
+
+    .material-icons.mdc-button__icon{
+        position:absolute;
+    }
+
+    .mdc-button__icon + input{
+        padding-left: 40px;
+    }
+
+    .blueButton {
+        border-radius: 5px;
+        height: 37px;
+        background-color: rgb(0, 183, 255);
+        color: white;
+        font-weight: bold;
+        border: none;
+        width: 20%;
+        padding-left: 10px;
+    }
+
+    .iconify {
+        cursor: pointer;
+    }
+
+</style>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<script>
+    function create_user() {
+
+        window.location.href = 'users/create/<username>/<password>'
+    }
+</script>
+<div id="container">
+    <div id="table-div">
+        <div class='wrapper'>
+            <div class="md-form mt-0" style='padding-right: 5px; width: 100%;'>
+                <div style="width: 100%">
+                    <div style="padding-right: 10px; width: 100%; float: left; display: inline;">
+                        <span class="iconify material-icons mdc-button__icon" data-icon="ant-design:search-outlined"></span>
+                        <input #userFilter placeholder="Search users by username..." aria-label="Search" class="form-control"  type="text" style='width: 80%; height: 40px;'>
+                    </div>
+                </div>
+            </div><br>
+        </div>
+        <table>
+            <tr>
+                <th>Id</th>
+                <th>Username</th>
+                <th>Password</th>
+                <th>Actions</th>
+            </tr>
+            {% for user in users %}
+            <tr>
+                <td>{{user['id']}}</td>
+                <td><input id="username{{user['id']}}" value="{{user['username']}}"></td>
+                <td><input id="password{{user['id']}}" value="{{user['password']}}"></td>
+                <td>
+                    <span id="edit" class="iconify" data-icon="akar-icons:edit" style="color: blue;"></span>
+                    <span id="delete" class="iconify" data-icon="ant-design:delete-filled" style="color: red;"></span>
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+        <!-- <button type="button" class="btn btn-info btn-sm" data-toggle="modal" data-target="#myOutput1">Output</button> -->
+    </div>
+</div>

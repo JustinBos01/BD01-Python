@@ -1,0 +1,122 @@
+<style>
+    html {
+        background-color: rgb(59, 72, 75);
+    }
+
+    table {
+        font-family: arial, sans-serif;
+        border-collapse: collapse;
+        width: 100%;
+        align-self: center; 
+    }
+
+    tr {
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+
+    th {
+        background-color: white;
+        color: rgb(2, 189, 202);
+        text-align: left;
+        padding: 8px;
+    }
+
+    td {
+        text-align: left;
+        padding: 8px;
+    }
+
+    tr:nth-child(odd) {
+        background-color: #eefeff;
+    }
+
+    tr:hover {
+        background-color: rgb(5,129,162);
+    }
+
+    body {
+        background-color: rgb(233, 240, 241);
+        border-radius: 25px;
+    }
+
+    #container {
+        padding: 15px;
+    }
+
+    #table-div {
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+
+    .searchBar {
+        border-radius: 10px;
+        height: 30px;
+        outline: none;
+    }
+
+    .md-form.mt-0 {
+        display:flex;
+        align-items: center;
+    }
+
+    .material-icons.mdc-button__icon{
+        position:absolute;
+    }
+
+    .mdc-button__icon + input{
+        padding-left: 40px;
+    }
+
+    .blueButton {
+        border-radius: 5px;
+        height: 37px;
+        background-color: rgb(0, 183, 255);
+        color: white;
+        font-weight: bold;
+        border: none;
+        width: 20%;
+        padding-left: 10px;
+    }
+
+    .iconify {
+        cursor: pointer;
+    }
+
+</style>
+<script src="https://code.iconify.design/2/2.0.3/iconify.min.js"></script>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+
+<html>
+    <body>
+        <div id="container">
+            <div id="table-div">
+                <div class='wrapper'>
+                    <div class="md-form mt-0" style='padding-right: 5px; width: 100%;'>
+                        <div style="width: 100%">
+                            <div style="padding-right: 10px; width: 100%; float: left; display: inline;">
+                                <span id="edit" class="iconify material-icons mdc-button__icon" data-icon="ant-design:search-outlined"></span>
+                                <input placeholder="Search locations..." aria-label="Search" class="form-control"  type="text" style='width: 80%; height: 40px;'>
+                            </div>
+                            <button class='blueButton' style='padding-left: 10px; height: 40px;  float: left; display: inline; position: fixed; right: 25px'>+ Add Location </button>
+                        </div>
+                    </div><br>
+                </div>
+                <table>
+                    <tr>
+                        <th>Lane id</th>
+                        <th>Angle</th>
+                        <th>Distance</th>
+                    </tr>
+                    <tr>
+                        <td>1</td>
+                        <td>Angle</td>
+                        <td>3</td>
+                    </tr>
+                </table>
+                <button #exportBtn id='exportBtn' (click)="exportCsv(testList, 'tests')">Export</button>
+                <!-- <button type="button" class="btn btn-info btn-sm" data-toggle="modal" data-target="#myOutput1">Output</button> -->
+            </div>
+        </div>
+    </body>
+</html>
