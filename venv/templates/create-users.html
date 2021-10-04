@@ -83,12 +83,21 @@
     }
 
 </style>
-<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-<script>
-    function create_user() {
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
 
-        window.location.href = 'users/create/<username>/<password>'
-    }
+<script>
+    $(function() {
+        $('#create-user').on('click', function(e) {
+            username = document.getElementById('username-new-user').value
+            password = document.getElementById('password-new-user').value
+            if (username != '' && password != '') {
+                window.location.href = 'users/create/'+ username+ '/'+ password
+            }
+        });
+    });
 </script>
 <div id="container">
     <div id="table-div">
@@ -102,6 +111,7 @@
                 </div>
             </div><br>
         </div>
+
         <table>
             <tr>
                 <th>Id</th>
@@ -109,6 +119,7 @@
                 <th>Password</th>
                 <th>Actions</th>
             </tr>
+
             {% for user in users %}
             <tr>
                 <td>{{user['id']}}</td>
@@ -122,5 +133,41 @@
             {% endfor %}
         </table>
         <!-- <button type="button" class="btn btn-info btn-sm" data-toggle="modal" data-target="#myOutput1">Output</button> -->
+    </div>
+    <!-- Button trigger modal -->
+    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#createUserModal">
+        Launch demo modal
+    </button>
+  
+    <!-- Modal -->
+    <div class="modal fade" id="createUserModal" tabindex="-1" role="dialog" aria-labelledby="createUserModalCenterTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLongTitle">Modal title</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text">Username</span>
+                        </div>
+                        <textarea id='username-new-user' class="form-control" aria-label="With textarea" placeholder="username here..."></textarea>
+                    </div><br>
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text">Password</span>
+                        </div>
+                        <textarea id='password-new-user' class="form-control" aria-label="With textarea" placeholder="password here..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button id='create-user' type="button" class="btn btn-primary">Create User</button>
+                </div>
+            </div>
+        </div>
     </div>
 </div>

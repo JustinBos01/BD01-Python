@@ -1,4 +1,5 @@
 from flask import Flask, request, render_template
+from flask_modals import Modal
 import Include
 import requests
 
@@ -13,13 +14,24 @@ from requests import api
 #    ...
 
 app =  Flask(__name__)
+modal = Modal(app)
 api_url = "http://localhost:8080"
 
-@app.route('/', methods=['GET', 'POST'])
+@app.route('/')
 def index():
-    response = requests.get(api_url)
+    return workspaces()
+
+@app.route('/workspaces', methods=['GET', 'POST'])
+def workspaces():
+    response = requests.get(api_url+"/workspaces")
     json_string = response.json()
-    return render_template("create-environment.html", value = json_string)          
+    return render_template("create-environment.html", workspaces = json_string)
+
+@app.route('/workspaces/create/<workspace_name>', methods=['GET', 'POST'])
+def create_workspace(workspace_name):
+    json_string = {"workspace_name": workspace_name}
+    response = requests.get(api_url+"/workspaces/insert", json=json_string)
+    return workspaces()
 
 @app.route('/edit', methods=['GET', 'POST'])
 def edit():
@@ -31,8 +43,8 @@ def users():
     json_string = response.json()
     return render_template('create-users.html', users = json_string)
 
-@app.route('/users/create/<username>/<password>', methods=['POST'])
-def create_user():
-    json_string = {"userName": request.args.get('username'), "password": request.args.get('password')}
-    response = requests.post(api_url, json=json_string)
-    return
+@app.route('/users/create/<username>/<password>', methods=['GET','POST'])
+def create_user(username, password):
+    json_string = {"userName": username, "password": password}
+    response = requests.get(api_url+"/users/insert", json=json_string)
+    return users()

@@ -84,8 +84,12 @@
     }
 
 </style>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
 <script src="https://code.iconify.design/2/2.0.3/iconify.min.js"></script>
-<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+
 
 <script type=text/javascript>
     $(function() {
@@ -100,6 +104,12 @@
         });
     });
 
+    $(function() {
+        $('#create-workspace').on('click', function(e) {
+            workspace_name = document.getElementById('name-new-workspace').value
+            window.location.href = '/workspaces/create/' + workspace_name
+        })
+    })
 </script>
 
 <html>
@@ -114,48 +124,57 @@
                                 <span class="iconify material-icons mdc-button__icon" data-icon="ant-design:search-outlined"></span>
                                 <input #locationFilter placeholder="Search locations..." aria-label="Search" class="form-control"  type="text" style='width: 80%; height: 40px;'>
                             </div>
-                            <button class='blueButton' style='padding-left: 10px; height: 40px;  float: left; display: inline; position: fixed; right: 25px'>+ Add Location </button>
+                            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#createUserModal" style='padding-left: 10px; height: 40px;  float: left; display: inline; position: fixed; right: 25px'>
+                                + Add Location
+                            </button>
                         </div>
                     </div><br>
                 </div>
                 <table>
                     <tr>
+                        <th>Id</th>
                         <th>Location name</th>
-                        <th>Created on</th>
                         <th>Actions</th>
                     </tr>
+                    {% for workspace in workspaces %}
                     <tr>
-                        <td><input value="test"></td>
-                        <td>test</td>
+                        <td>{{workspace['id']}}</td>
+                        <td><input id="workspace-{{workspace['workspace_name']}}" value="{{workspace['workspace_name']}}"></td>
                         <td>
                             <span id="edit" class="iconify" data-icon="akar-icons:edit" style="color: blue;"></span>
                             <span id="delete" class="iconify" data-icon="ant-design:delete-filled" style="color: red;"></span>
                         </td>
                     </tr>
+                    {% endfor %}
                 </table>
-                <button #exportBtn id='exportBtn' (click)="exportCsv(testList, 'tests')">Export</button>
-                <!-- <button type="button" class="btn btn-info btn-sm" data-toggle="modal" data-target="#myOutput1">Output</button> -->
             </div>
         </div>
-        <button id='users'></button>
-        <!-- {% for history in histories %}
-            <div class="modal fade" id="myOutput1" role="dialog">
-                <div class="modal-dialog modal-lg">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <button type="button" class="close" data-dismiss="modal">&times;</button>
-                            <h4 class="modal-title">Task Output</h4>
+        <button id='users'>users</button>
+    </body>
+    <!-- Modal -->
+    <div class="modal fade" id="createUserModal" tabindex="-1" role="dialog" aria-labelledby="createUserModalCenterTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLongTitle">Modal title</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text">Workspace Name</span>
                         </div>
-                        <div class="modal-body">
-                            <label>test</label>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                        </div>
-                    </div>
+                        <textarea id='name-new-workspace' class="form-control" aria-label="With textarea" placeholder="Workspace Name here..."></textarea>
+                    </div><br>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button id='create-workspace' type="button" class="btn btn-primary">Create Workspace</button>
                 </div>
             </div>
-        {% endfor %}
-        {% endblock %} -->
-    </body>
+        </div>
+    </div>
+    {% endblock %}
 </html>

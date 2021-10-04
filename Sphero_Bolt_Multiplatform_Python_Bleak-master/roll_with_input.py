@@ -134,6 +134,93 @@ async def calculate_distance_reverse(my_sphero, action_collection):
                     await asyncio.sleep(2)
                 print('stopping')
 
+# async def calculate_distance2(my_sphero, distance, heading):
+#     #255 speed 1 seconde = 78 cm
+#     #bx = y
+
+#     # distance = 0.78
+#     # speed = 255
+#     # time = 1
+#     # 0.78m per seconde 255 speed
+#     # time = distance/0.78
+#     #22 cm 50 speed 2 seconde
+#     await my_sphero.connect()
+#     await my_sphero.wake()
+#     await my_sphero.resetYaw()
+
+#     action_backup = [{"distance":distance, "heading":heading}]
+
+#     while distance != 0:
+#         if distance > 1.56:
+#             passed_distance = math.floor(distance/1.56)
+#             distance -= 1.56*passed_distance
+            
+#             await asyncio.sleep(2)
+
+#             for index in range(passed_distance-1):
+#                 await my_sphero.roll(255, heading)
+#                 await asyncio.sleep(2)
+
+#         else:
+#             while(distance >= 0):
+#                 time = math.floor(distance/0.22)
+#                 if time <= 0:
+#                     time = 1
+#                 distance -= time*0.22
+#                 await asyncio.sleep(2)
+#                 for i in range(time-1):
+#                     await my_sphero.roll(35, heading)
+#                     await asyncio.sleep(2)
+#                 print(distance)
+#                 # loop.set_debug(True)
+#                 # await loop.run_until_complete(calculate_distance_reverse(my_sphero, distance_backup, heading-180))
+                
+#     await asyncio.sleep(10)
+#     loop = asyncio._set_running_loop(await calculate_distance_reverse(my_sphero, action_backup))
+#     await my_sphero.disconnect()
+
+async def calculate_distance_reverse(my_sphero, action_collection):
+    #255 speed 1 seconde = 78 cm
+    #bx = y
+
+    # distance = 0.78
+    # speed = 255
+    # time = 1
+    # 0.78m per seconde 255 speed
+    # time = distance/0.78
+
+    #22 cm 50 speed 2 seconde
+
+    for i in action_collection:
+        distance = i['distance']
+        while distance != 0:
+            if distance > 1.56:
+                passed_distance = math.floor(distance/1.56)
+                distance -= 1.56*passed_distance
+                i['distance'] = distance
+                
+                await asyncio.sleep(2)
+
+                # roll in a square
+                for index in range(passed_distance-1):
+                    heading = int(i['heading'])
+                    await my_sphero.roll(255, heading)
+                    await asyncio.sleep(2)
+
+            else:
+                if i['heading'] > 360:
+                    i['heading'] -= 180
+                distance = i['distance']
+                time = math.floor(distance/0.22)
+                distance -= time*0.22
+                i['distance'] = distance
+                await asyncio.sleep(2)
+                for i in range(time-1):
+                    heading = int(i['heading'])
+                    await my_sphero.roll(35, heading)
+                    await asyncio.sleep(2)
+                print('stopping')
+
 if __name__ == "__main__":
     distance = 1.5
     angle = 90
