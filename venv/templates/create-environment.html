@@ -90,14 +90,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
 
-
 <script type=text/javascript>
-    $(function() {
-        $('#edit').on('click', function(e) {
-            window.location.href = '/edit'
-        });
-    });
-
     $(function() {
         $('#users').on('click', function(e) {
             window.location.href = '/users'
@@ -107,9 +100,24 @@
     $(function() {
         $('#create-workspace').on('click', function(e) {
             workspace_name = document.getElementById('name-new-workspace').value
-            window.location.href = '/workspaces/create/' + workspace_name
+            if (workspace_name != '') {
+                window.location.href = '/workspaces/create/' + workspace_name
+            }
         })
     })
+
+    function delete_workspace(id) {
+        window.location.href = '/workspaces/delete/'+id
+    }
+
+    function update_workspace(id, name) {
+        console.log(id, name)
+        window.location.href = '/workspaces/update/'+id+"/"+name
+    }
+
+    function workspace_locations(id) {
+        window.location.href = '/locations/'+id
+    }
 </script>
 
 <html>
@@ -124,9 +132,7 @@
                                 <span class="iconify material-icons mdc-button__icon" data-icon="ant-design:search-outlined"></span>
                                 <input #locationFilter placeholder="Search locations..." aria-label="Search" class="form-control"  type="text" style='width: 80%; height: 40px;'>
                             </div>
-                            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#createUserModal" style='padding-left: 10px; height: 40px;  float: left; display: inline; position: fixed; right: 25px'>
-                                + Add Location
-                            </button>
+                            <button class='blueButton' type="button" data-toggle="modal" data-target="#createWorkspaceModal" style='padding-left: 10px; height: 40px;  float: left; display: inline; position: fixed; right: 25px'>+ Add workspace </button>
                         </div>
                     </div><br>
                 </div>
@@ -138,11 +144,13 @@
                     </tr>
                     {% for workspace in workspaces %}
                     <tr>
-                        <td>{{workspace['id']}}</td>
-                        <td><input id="workspace-{{workspace['workspace_name']}}" value="{{workspace['workspace_name']}}"></td>
+                        <td id="workspace-id-{{workspace['id']}}">{{workspace['id']}}</td>
+                        <td><input id="workspace-name-{{workspace['workspace_name']}}" value="{{workspace['workspace_name']}}" onchange="update_workspace(`{{workspace['id']}}`, this.value)"></td>
                         <td>
-                            <span id="edit" class="iconify" data-icon="akar-icons:edit" style="color: blue;"></span>
-                            <span id="delete" class="iconify" data-icon="ant-design:delete-filled" style="color: red;"></span>
+                            <label id='workspace-id-ref'>{{workspace['workspace_id']}}</label>
+                            <span id="edit" class="iconify" data-icon="akar-icons:edit" style="color: blue;" onclick="workspace_locations(`{{workspace['id']}}`)"></span>
+                            <span id="delete" class="iconify" data-icon="ant-design:delete-filled" style="color: red;" onclick="delete_workspace(`{{workspace['id']}}`)"></span>
+                            <span class="iconify" data-icon="ant-design:arrow-right-outlined" style="color: green;"></span>
                         </td>
                     </tr>
                     {% endfor %}
@@ -152,7 +160,7 @@
         <button id='users'>users</button>
     </body>
     <!-- Modal -->
-    <div class="modal fade" id="createUserModal" tabindex="-1" role="dialog" aria-labelledby="createUserModalCenterTitle" aria-hidden="true">
+    <div class="modal fade" id="createWorkspaceModal" tabindex="-1" role="dialog" aria-labelledby="createWorkspaceModalCenterTitle" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -170,7 +178,7 @@
                     </div><br>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal" style='background-color: red'>Close</button>
                     <button id='create-workspace' type="button" class="btn btn-primary">Create Workspace</button>
                 </div>
             </div>

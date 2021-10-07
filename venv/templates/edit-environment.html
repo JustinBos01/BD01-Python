@@ -82,10 +82,31 @@
     .iconify {
         cursor: pointer;
     }
-
 </style>
+
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
 <script src="https://code.iconify.design/2/2.0.3/iconify.min.js"></script>
-<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+
+<script>
+    function create_location(workspace_id, angle, distance) {
+        window.location.href = '/locations/create/' + workspace_id + '/' + angle + '/' + distance;
+    }
+    
+    function delete_location(id, workspace_id){
+        window.location.href = '/locations/delete/' + id + '/' + workspace_id
+    }
+    
+    function update_location(id, workspace_id){
+        angle = document.getElementById('inputAngle'+id).value
+        distance = document.getElementById('inputDistance'+id).value
+        if (angle != null && distance != null) {
+            window.location.href = '/locations/update/' + id + '/' + workspace_id + '/' + angle + '/' + distance
+        }
+    }
+</script>
 
 <html>
     <body>
@@ -98,25 +119,93 @@
                                 <span id="edit" class="iconify material-icons mdc-button__icon" data-icon="ant-design:search-outlined"></span>
                                 <input placeholder="Search locations..." aria-label="Search" class="form-control"  type="text" style='width: 80%; height: 40px;'>
                             </div>
-                            <button class='blueButton' style='padding-left: 10px; height: 40px;  float: left; display: inline; position: fixed; right: 25px'>+ Add Location </button>
+                            <button class='blueButton' type="button" data-toggle="modal" data-target="#createUserModal" style='padding-left: 10px; height: 40px;  float: left; display: inline; position: fixed; right: 25px'>+ Add Location </button>
                         </div>
                     </div><br>
                 </div>
                 <table>
                     <tr>
-                        <th>Lane id</th>
+                        <th>Workspace id</th>
                         <th>Angle</th>
                         <th>Distance</th>
+                        <th>Actions</th>
                     </tr>
+                    {% for location in locations %}
                     <tr>
-                        <td>1</td>
-                        <td>Angle</td>
-                        <td>3</td>
+                        <td id="location-name-{{location['workspace_id']}}" value="{{location['workspace_id']}}">{{location['workspace_id']}}</td>
+                        <td id="distance-{{location['id']}}">{{location['angle']}}</td>
+                        <td id="angle-{{location['id']}}">{{location['distance']}}</td>
+                        <td>
+                            <span id="edit" data-toggle="modal" data-target="#editLocationModal{{location['id']}}" class="iconify" data-icon="akar-icons:edit" style="color: blue;"></span>
+                            <span id="delete" class="iconify" data-icon="ant-design:delete-filled" style="color: red;" onclick="delete_location(`{{location['id']}}`,`{{location['workspace_id']}}`)"></span>
+                            <span class="iconify" data-icon="ant-design:arrow-right-outlined" style="color: green;"></span>
+                        </td>
                     </tr>
+                    <!-- Modal -->
+                    <div class="modal fade" id="editLocationModal{{location['id']}}" tabindex="-1" role="dialog" aria-labelledby="editLocationModalCenterTitle{{location['id']}}" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="exampleModalLongTitle">Edit step {{location['id']}}</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="form-group row">
+                                        <label for="inputAngle" class="col-sm-2 col-form-label">Angle</label>
+                                        <div class="col-sm-10">
+                                            <input type="text" class="form-control" id="inputAngle{{location['id']}}" placeholder="{{location['angle']}}">
+                                        </div>
+                                    </div>
+                                    <div class="form-group row">
+                                        <label for="inputDistance" class="col-sm-2 col-form-label">Distance</label>
+                                        <div class="col-sm-10">
+                                            <input class="form-control" id="inputDistance{{location['id']}}" placeholder="{{location['distance']}}">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal" style='background-color: red'>Close</button>
+                                    <button id='update-workspace' type="button" class="btn btn-primary" onclick="update_location(`{{location['id']}}`,`{{location['workspace_id']}}`)">Save Location</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
                 </table>
-                <button #exportBtn id='exportBtn' (click)="exportCsv(testList, 'tests')">Export</button>
-                <!-- <button type="button" class="btn btn-info btn-sm" data-toggle="modal" data-target="#myOutput1">Output</button> -->
             </div>
         </div>
     </body>
+    <!-- Modal -->
+    <div class="modal fade" id="createUserModal" tabindex="-1" role="dialog" aria-labelledby="createUserModalCenterTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLongTitle">Create Location</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group row">
+                        <label for="inputCreateAngle" class="col-sm-2 col-form-label">Angle</label>
+                        <div class="col-sm-10">
+                            <input type="number" min='0' max='359' class="form-control" id="inputCreateAngle" placeholder="Angle here...">
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label for="inputCreateDistance" class="col-sm-2 col-form-label">Distance</label>
+                        <div class="col-sm-10">
+                            <input type="number" min='0' class="form-control" id="inputCreateDistance" placeholder="Distance here...">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal" style='background-color: red'>Close</button>
+                    <button id='create-workspace' type="button" class="btn btn-primary" onclick="create_location(`{{locations[0]['workspace_id']}}`, inputCreateAngle.value, inputCreateDistance.value)">Create Location</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </html>
