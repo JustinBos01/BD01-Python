@@ -5,7 +5,7 @@ from typing import Dict
 from sphero_bolt import SpheroBolt
 # mac address of sphero bolt
 address = (
-    "DD:E6:08:45:EA:7D"
+    "C8:A9:B8:65:67:EA"
 )
 
 # connect to sphero bolt
@@ -72,8 +72,6 @@ async def calculate_distance(my_sphero, action_collection):
                     await asyncio.sleep(2)
 
             else:
-                heading = int(i['heading'])
-                distance = int(i['distance'])
                 while(distance >= 0):
                     time = math.floor(distance/0.22)
                     if time <= 0:

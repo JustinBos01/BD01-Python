@@ -118,6 +118,10 @@
     function workspace_locations(id) {
         window.location.href = '/locations/'+id
     }
+
+    function go_to_location(id) {
+        window.location.href = '/roll/' + id
+    }
 </script>
 
 <html>
@@ -147,14 +151,14 @@
                         <td id="workspace-id-{{workspace['id']}}">{{workspace['id']}}</td>
                         <td><input id="workspace-name-{{workspace['workspace_name']}}" value="{{workspace['workspace_name']}}" onchange="update_workspace(`{{workspace['id']}}`, this.value)"></td>
                         <td>
-                            <label id='workspace-id-ref'>{{workspace['workspace_id']}}</label>
                             <span id="edit" class="iconify" data-icon="akar-icons:edit" style="color: blue;" onclick="workspace_locations(`{{workspace['id']}}`)"></span>
                             <span id="delete" class="iconify" data-icon="ant-design:delete-filled" style="color: red;" onclick="delete_workspace(`{{workspace['id']}}`)"></span>
-                            <span class="iconify" data-icon="ant-design:arrow-right-outlined" style="color: green;"></span>
+                            <span id='roll' class="iconify" data-icon="ant-design:arrow-right-outlined" style="color: green;" onclick="go_to_location(`{{workspace['id']}}`)"></span>
                         </td>
                     </tr>
                     {% endfor %}
-                </table>
+                    
+                </table><br><br>
             </div>
         </div>
         <button id='users'>users</button>

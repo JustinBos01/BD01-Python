@@ -3,30 +3,127 @@ from flask_modals import Modal
 import requests
 import sys
 #sys.path.append('C:/Users/31638/Documents/GitHub/BD01-Python/venv/Include/Sphero_Bolt_Multiplatform_Python_Bleak-master/sphero_bolt.py')
-# import asyncio
-# import math
-# from typing import Dict
-# from sphero_bolt import SpheroBolt
-# from roll_with_input import *
+import asyncio
+import math
+from typing import Dict
+from sphero_bolt import SpheroBolt
 
 
 app =  Flask(__name__)
 modal = Modal(app)
 api_url = "http://localhost:8080"
 
+
+address = (
+    "C8:A9:B8:65:67:EA"
+)
+
+# connect to sphero bolt
+my_sphero = SpheroBolt(address)
+
+async def run(my_sphero):
+    
+    try:
+        await my_sphero.connect()
+
+        # wake sphero
+        await my_sphero.wake()
+
+        await my_sphero.resetYaw()
+        await asyncio.sleep(2)
+
+        # roll in a square
+        for i in range(4):
+            await my_sphero.roll(50, 90 * i)
+            await asyncio.sleep(2)
+
+    finally:
+        await my_sphero.disconnect()
+
+
+async def calculate_distance(my_sphero, action_collection):
+    print(action_collection)
+    await my_sphero.connect()
+    await my_sphero.wake()
+    await my_sphero.resetYaw()
+    for i in action_collection:
+        distance = i['distance']
+        heading = i['heading']
+        action_backup = action_collection
+
+        for looping in range(2):
+            if distance > 1.56:
+                passed_distance = math.floor(distance/1.56)
+                distance -= 1.56*passed_distance
+                await asyncio.sleep(2)
+                for index in range(passed_distance-1):
+                    await my_sphero.roll(255, heading)
+                    await asyncio.sleep(2)
+
+            else:
+                while distance >= 0:
+                    time = math.floor(distance/0.22)
+                    #handle remainder of distance
+                    if time <= 0:
+                        time = 1
+                    distance -= time*0.22
+                    await asyncio.sleep(2)
+                    for i in range(time-1):
+                        await my_sphero.roll(35, heading)
+                        await asyncio.sleep(2)
+    print("returning")
+    asyncio._set_running_loop(await calculate_reverse_distance(my_sphero, action_backup))
+    return
+
+async def calculate_reverse_distance(my_sphero, action_collection):
+    for i in reversed(action_collection):
+        distance = i['distance']
+        heading = i['heading']+180
+        if heading >= 360:
+            heading -= 360
+        action_backup = action_collection
+
+        for looping in range(2):
+            if distance > 1.56:
+                passed_distance = math.floor(distance/1.56)
+                distance -= 1.56*passed_distance
+                await asyncio.sleep(2)
+                for index in range(passed_distance-1):
+                    await my_sphero.roll(255, heading)
+                    await asyncio.sleep(2)
+
+            else:
+                while distance >= 0:
+                    time = math.floor(distance/0.22)
+                    #handle remainder of distance
+                    if time <= 0:
+                        time = 1
+                    distance -= time*0.22
+                    await asyncio.sleep(2)
+                    for i in range(time-1):
+                        await my_sphero.roll(35, heading)
+                        await asyncio.sleep(2)
+    await my_sphero.disconnect()
+    return
+
+
+
+
+
 @app.route('/')
 def index():
-#     distance = 1.5
-#     angle = 90
-#     collection = [{
-#         "distance":  1.5,
-#         "heading": 90
-#     }]
-#     collection.append({
-#         "distance": 1.5,
-#         "heading": 180
-#     })
-#     loop.run_until_complete(calculate_distance(my_sphero, collection))
+    #collection = [{
+    #    "distance":  0.5,
+    #    "heading": 90
+    #}]
+    #collection.append({
+    #    "distance": 0.5,
+    #    "heading": 180
+    #})
+    #loop = asyncio.new_event_loop()
+    #asyncio.set_event_loop(loop)
+    #loop.set_debug(True)
+    #loop.run_until_complete(calculate_distance(my_sphero, collection))
     return workspaces()
 
 @app.route('/workspaces', methods=['GET', 'POST'])
@@ -96,3 +193,20 @@ def create_user(username, password):
     json_string = {"userName": username, "password": password}
     response = requests.get(api_url+"/users/insert", json=json_string)
     return users()
+
+@app.route('/roll/<workspace_id>')
+def roll_workspace(workspace_id):
+    json_string = { 'workspace_id': int(workspace_id) }
+    response = requests.get(api_url+"/locations/by_workspace_id", json=json_string)
+    route_data = response.json()
+    route = []
+    for i in route_data:
+        route.append({
+            "distance": i['distance'],
+            "heading": i['angle']
+        })
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    loop.set_debug(True)
+    loop.run_until_complete(calculate_distance(my_sphero, route))
+    return redirect('/')
