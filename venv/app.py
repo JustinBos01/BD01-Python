@@ -7,6 +7,7 @@ import asyncio
 import math
 from typing import Dict
 from sphero_bolt import SpheroBolt
+import azure.cognitiveservices.speech as speechsdk
 
 
 app =  Flask(__name__)
@@ -15,7 +16,7 @@ api_url = "http://localhost:8080"
 
 
 address = (
-    "C8:A9:B8:65:67:EA"
+    "F5:68:22:6D:5D:9D"
 )
 
 # connect to sphero bolt
@@ -108,22 +109,8 @@ async def calculate_reverse_distance(my_sphero, action_collection):
 
 
 
-
-
 @app.route('/')
 def index():
-    #collection = [{
-    #    "distance":  0.5,
-    #    "heading": 90
-    #}]
-    #collection.append({
-    #    "distance": 0.5,
-    #    "heading": 180
-    #})
-    #loop = asyncio.new_event_loop()
-    #asyncio.set_event_loop(loop)
-    #loop.set_debug(True)
-    #loop.run_until_complete(calculate_distance(my_sphero, collection))
     return workspaces()
 
 @app.route('/workspaces', methods=['GET', 'POST'])
@@ -131,6 +118,10 @@ def workspaces():
     response = requests.get(api_url+"/workspaces")
     json_string = response.json()
     return render_template("create-environment.html", workspaces = json_string)
+
+@app.route('/workspaces', methods=['GET', 'POST'])
+def workspaces():
+    return render_template("create-environment-on-error.html")
 
 @app.route('/workspaces/create/<workspace_name>', methods=['GET', 'POST'])
 def create_workspace(workspace_name):
@@ -156,6 +147,7 @@ def location(workspace_id):
     response = requests.get(api_url+"/locations/by_workspace_id", json=json_string)
     json_string = response.json()
     return render_template("edit-environment.html", locations = json_string)
+
 
 @app.route('/locations/create/<workspace_id>/<angle>/<distance>', methods=['GET', 'POST'])
 def create_location(workspace_id, angle, distance):
@@ -210,3 +202,37 @@ def roll_workspace(workspace_id):
     loop.set_debug(True)
     loop.run_until_complete(calculate_distance(my_sphero, route))
     return redirect('/')
+
+@app.route('/speech')
+async def from_mic():
+    speech_config = speechsdk.SpeechConfig(subscription="<paste-your-speech-key-here>", region="<paste-your-speech-location/region-here>")
+    speech_recognizer = speechsdk.SpeechRecognizer(speech_config=speech_config)
+    speech_config.speech_recognition_language="en-US"
+    
+    print("Speak into your microphone.")
+    result = speech_recognizer.recognize_once_async().get()
+    print(result.text)
+    if result.reason == speechsdk.ResultReason.RecognizedSpeech:
+        print("Recognized: {}".format(result.text))
+    elif result.reason == speechsdk.ResultReason.NoMatch:
+        print("No speech could be recognized: {}".format(result.no_match_details))
+    elif result.reason == speechsdk.ResultReason.Canceled:
+        cancellation_details = result.cancellation_details
+        print("Speech Recognition canceled: {}".format(cancellation_details.reason))
+        if cancellation_details.reason == speechsdk.CancellationReason.Error:
+            print("Error details: {}".format(cancellation_details.error_details))
+    await asyncio.sleep(10)
+    return redirect('/')
+
+
+@app.errorhandler(404)
+def page_not_found(e):
+    return redirect('/')
+
+@app.errorhandler(500)
+def page_not_found(e):
+    return render_template('error-handle.html')
+
+if __name__ == "__main__":
+  app.debug = True
+  app.run()

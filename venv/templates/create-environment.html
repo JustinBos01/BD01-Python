@@ -83,6 +83,10 @@
         cursor: pointer;
     }
 
+    #speech {
+        visibility: hidden;
+    }
+
 </style>
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
 <script src="https://code.iconify.design/2/2.0.3/iconify.min.js"></script>
@@ -91,6 +95,9 @@
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
 
 <script type=text/javascript>
+    var counter = 0;
+    var stop_condition = false;
+
     $(function() {
         $('#users').on('click', function(e) {
             window.location.href = '/users'
@@ -110,6 +117,85 @@
         window.location.href = '/workspaces/delete/'+id
     }
 
+    function speech_roll(workspaces){
+        var SpeechRecognition = SpeechRecognition || webkitSpeechRecognition;
+        var recognition = new SpeechRecognition();
+                    
+        // This runs when the speech recognition service starts
+        recognition.onstart = function() {
+            if (counter == 0) {
+                counter += 1
+                $('#speech').css({
+                    'visibility': 'visible'
+                });
+                $('#no-speech').css({
+                    'visibility': 'hidden'
+                });
+                console.log("We are listening. Try speaking into the microphone.");
+            } else {
+                
+            }
+        };
+
+        recognition.onspeechend = function() {
+            // when user is done speaking
+            console.log("Canceling voice control...")
+            $('#speech').css({
+                'visibility': 'hidden'
+            });
+            $('#no-speech').css({
+                'visibility': 'visible'
+            });
+            recognition.stop();
+        }
+                    
+        // This runs when the speech recognition service returns result
+        recognition.onresult = function() {
+            var transcript = event.results[0][0].transcript;
+            var confidence = event.results[0][0].confidence;
+            while (true) {
+                workspaces = workspaces.replace("'", `"`)
+                if (workspaces.includes("'") == false) {
+                    break
+                }
+            }
+            workspaces = JSON.parse(workspaces)
+
+            for (let i of workspaces) {
+                if (transcript == i.workspace_name) {
+                    go_to_location(i.id)
+                } else {
+                    console.log('No workspace found for ' + transcript)
+                }
+            }
+        }
+        recognition.start();
+        // start recognition
+        
+    }
+
+    $(function() {
+        $('#speech').on('click', function(e) {
+            $('#speech').css({
+                'visibility': 'hidden'
+            });
+            $('#no-speech').css({
+                'visibility': 'visible'
+            });
+        })
+    })
+
+    $(function() {
+        $('#no-speech').on('click', function(e) {
+            $('#speech').css({
+                'visibility': 'visible'
+            });
+            $('#no-speech').css({
+                'visibility': 'hidden'
+            });
+        })
+    })
+    
     function update_workspace(id, name) {
         console.log(id, name)
         window.location.href = '/workspaces/update/'+id+"/"+name
@@ -132,36 +218,40 @@
                 <div class='wrapper'>
                     <div class="md-form mt-0" style='padding-right: 5px; width: 100%;'>
                         <div style="width: 100%">
-                            <div style="padding-right: 10px; width: 100%; float: left; display: inline;">
+                            <span id='speech' onclick='speech_roll(`{{workspaces}}`)'  class="iconify speech" data-icon="ant-design:audio-filled" style="color: #1aa9d9;" data-width="32" data-height="32" style="visibility: 'hidden';"></span>
+                            <span id='no-speech' onclick='speech_roll(`{{workspaces}}`)' class="iconify" data-icon="ant-design:audio-muted-outlined" style="color: gray;" data-width="32" data-height="32" style="visibility: 'visible';"></span>
+                            <!-- <div style="padding-right: 10px; width: 100%; float: left; display: inline;">
                                 <span class="iconify material-icons mdc-button__icon" data-icon="ant-design:search-outlined"></span>
-                                <input #locationFilter placeholder="Search locations..." aria-label="Search" class="form-control"  type="text" style='width: 80%; height: 40px;'>
-                            </div>
+                                <input placeholder="Search locations..." aria-label="Search" class="form-control"  type="text" style='width: 80%; height: 40px;'>
+                            </div> -->
                             <button class='blueButton' type="button" data-toggle="modal" data-target="#createWorkspaceModal" style='padding-left: 10px; height: 40px;  float: left; display: inline; position: fixed; right: 25px'>+ Add workspace </button>
                         </div>
                     </div><br>
                 </div>
-                <table>
-                    <tr>
-                        <th>Id</th>
-                        <th>Location name</th>
-                        <th>Actions</th>
-                    </tr>
-                    {% for workspace in workspaces %}
-                    <tr>
-                        <td id="workspace-id-{{workspace['id']}}">{{workspace['id']}}</td>
-                        <td><input id="workspace-name-{{workspace['workspace_name']}}" value="{{workspace['workspace_name']}}" onchange="update_workspace(`{{workspace['id']}}`, this.value)"></td>
-                        <td>
-                            <span id="edit" class="iconify" data-icon="akar-icons:edit" style="color: blue;" onclick="workspace_locations(`{{workspace['id']}}`)"></span>
-                            <span id="delete" class="iconify" data-icon="ant-design:delete-filled" style="color: red;" onclick="delete_workspace(`{{workspace['id']}}`)"></span>
-                            <span id='roll' class="iconify" data-icon="ant-design:arrow-right-outlined" style="color: green;" onclick="go_to_location(`{{workspace['id']}}`)"></span>
-                        </td>
-                    </tr>
-                    {% endfor %}
+                {% if workspaces != [] %}
+                    <table>
+                        <tr>
+                            <th>Id</th>
+                            <th>Location name</th>
+                            <th>Actions</th>
+                        </tr>
                     
+                        {% for workspace in workspaces %}
+                            <tr>
+                                <td id="workspace-id-{{workspace['id']}}">{{workspace['id']}}</td>
+                                <td><input id="workspace-name-{{workspace['workspace_name']}}" value="{{workspace['workspace_name']}}" onchange="update_workspace(`{{workspace['id']}}`, this.value)"></td>
+                                <td>
+                                    <span id="edit" class="iconify" data-icon="akar-icons:edit" style="color: blue;" onclick="workspace_locations(`{{workspace['id']}}`)"></span>
+                                    <span id="delete" class="iconify" data-icon="ant-design:delete-filled" onclick="delete_workspace(`{{workspace['id']}}`)"></span>
+                                    <span id='roll' class="iconify" data-icon="ant-design:arrow-right-outlined" style="color: green;" onclick="go_to_location(`{{workspace['id']}}`)"></span>
+                                </td>
+                            </tr>
+                        {% endfor %}
                 </table><br><br>
+                {% endif %}
             </div>
         </div>
-        <button id='users'>users</button>
+
     </body>
     <!-- Modal -->
     <div class="modal fade" id="createWorkspaceModal" tabindex="-1" role="dialog" aria-labelledby="createWorkspaceModalCenterTitle" aria-hidden="true">

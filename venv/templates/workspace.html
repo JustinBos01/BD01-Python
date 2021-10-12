@@ -1,0 +1,167 @@
+<style>
+    /* div{
+        border: solid 1px black;
+    } */
+
+    .workfloor-placeholder{
+        border: 1px solid black;
+        width: 400px;
+        height: 500px;
+        display: grid;
+        /* 15 columns */
+        grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
+        /* 16 rows */
+        grid-template-rows: 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr; 
+    }
+
+    .street{
+        background-color: #cfcfcf;
+    }
+
+    #outer-right-street{
+        grid-column-start: 14;
+        grid-column-end: 15;
+        grid-row-start: 1;
+        grid-row-end: 17;
+    }
+
+    .horizontal-street{
+        grid-column-start: 1;
+        grid-column-end: 14;
+    }
+
+    #horizontal-street2{
+        grid-row-start: 11;
+        grid-row-end: 12;
+        grid-column-start: 1;
+        grid-column-end: 12;
+    }
+
+    #horizontal-street1{
+        grid-row-start: 16;
+        grid-row-end: 17;
+    }
+
+    #vertical-street1{
+        grid-column-start: 1;
+        grid-column-end: 2;
+        grid-row-start: 12;
+        grid-row-end: 16;
+    }
+
+    #vertical-street2{
+        grid-column-start: 12;
+        grid-column-end: 13;
+        grid-row-start: 7;
+        grid-row-end: 12;
+    }
+
+
+    .workplace{
+        background-color: #1aa9d9;
+    }
+
+    .workplace-column-1{
+        grid-column-start: 2;
+        grid-column-end: 4;
+    }
+
+    .workplace-column-2{
+        grid-column-start: 6;
+        grid-column-end: 8;	
+    }
+
+    .workplace-column-3{
+        grid-column-start: 10;
+        grid-column-end: 12;	
+    }
+
+
+    .workplace-row-5{
+        grid-row-start:2 ;
+        grid-row-end: 4;
+        margin-bottom: 5px;
+    }
+
+    .workplace-row-4{
+        grid-row-start: 4;
+        grid-row-end: 6;
+        margin-top: 5px;
+    }
+
+    .workplace-row-3{
+        grid-row-start: 7;
+        grid-row-end: 9;
+        margin-bottom: 5px;
+    }
+
+    .workplace-row-2{
+        grid-row-start: 9;
+        grid-row-end: 11;
+        margin-top: 5px;
+    }
+
+    .workplace-row-1{
+        grid-row-start: 12;
+        grid-row-end: 14;
+        margin-top: 5px;
+    }
+
+    .column-gap{
+        visibility: hidden;
+    }
+
+    .side-street-row-4-5{
+        grid-row-start:2 ;
+        grid-row-end: 6;
+    }
+</style>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="/css/index.css">
+	<link rel="stylesheet" type="text/css" href="/css/range.css">
+	<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.2/css/all.css" integrity="sha384-oS3vJWv+0UjzBfQzYUhtDYW+Pj2yciDJxpsK1OYPAYjqT085Qq/1cq5FLXAZQ7Ay" crossorigin="anonymous">
+    <title>workfloor map designen</title>
+</head>
+    <body>
+        <div class="workfloor-placeholder">
+            <div class="horizontal-street street" id="horizontal-street4"></div>
+            <div class="side-street-row-4-5 street"></div>
+
+            <div class="workplace workplace-column-1 workplace-row-5" id="workplace13"></div>
+            <div class="workplace workplace-column-2 workplace-row-5" id="workplace14"></div>
+            <div class="workplace workplace-column-3 workplace-row-5" id="workplace15"></div>
+
+            <div class="workplace workplace-column-1 workplace-row-4" id="workplace10"></div>
+            <div class="workplace workplace-column-2 workplace-row-4" id="workplace11"></div>
+            <div class="workplace workplace-column-3 workplace-row-4" id="workplace12"></div>
+
+
+            <div class="horizontal-street street" id="horizontal-street3"></div>
+
+            <div class="workplace workplace-column-1 workplace-row-3" id="workplace7"></div>
+            <div class="workplace workplace-column-2 workplace-row-3" id="workplace8"></div>
+            <div class="workplace workplace-column-3 workplace-row-3" id="workplace9"></div>
+
+            <div class="workplace workplace-column-1 workplace-row-2" id="workplace4"></div>
+            <div class="workplace workplace-column-2 workplace-row-2" id="workplace5"></div>
+            <div class="workplace workplace-column-3 workplace-row-2" id="workplace6"></div>
+
+            <div class="horizontal-street street" id="horizontal-street2"></div>
+
+            <div class="workplace workplace-column-1 workplace-row-1" id="workplace1"></div>
+            <div class="workplace workplace-column-2 workplace-row-1" id="workplace2"></div>
+            <div class="workplace workplace-column-3 workplace-row-1" id="workplace3"></div>
+
+            <div class="horizontal-street street" id="horizontal-street1"></div>
+
+            <div class="street" id="vertical-street1"></div>
+            <div class="street" id="vertical-street2"></div>
+
+            <div class="street" id="outer-right-street"></div>
+        </div>
+    </body>
+</html>
