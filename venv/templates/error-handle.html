@@ -20,12 +20,14 @@
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
 
 <script>
+    localStorage.setItem('prev_page', location.href)
+
     function workspace_error() {
-        
+        window.location.href = '/workspaces/on_error'
     }
 
     function location_error() {
-
+        window.location.href = '/locations/select_error'
     }
 </script>
 <html>
@@ -33,8 +35,8 @@
         <div class='container'>
             <div class='vertical-center'>
                 <label>What was your error about? Press one of the buttons down below to possibly fix your problem.</label><br><br>
-                <button type="button" class="btn btn-primary">Starting the program</button>
-                <button type="button" class="btn btn-primary">Creating a route to my workspace</button>
+                <button type="button" class="btn btn-primary" onclick="workspace_error()">Starting the program</button>
+                <button type="button" class="btn btn-primary" onclick="location_error()">Creating or editing a route to my workspace</button>
             </div>
         </div>
     </body>

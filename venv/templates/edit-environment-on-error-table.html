@@ -1,0 +1,134 @@
+<style>
+    html {
+        background-color: rgb(59, 72, 75);
+    }
+
+    table {
+        font-family: arial, sans-serif;
+        border-collapse: collapse;
+        width: 100%;
+        align-self: center; 
+    }
+
+    tr {
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+
+    th {
+        background-color: white;
+        color: rgb(2, 189, 202);
+        text-align: left;
+        padding: 8px;
+    }
+
+    td {
+        text-align: left;
+        padding: 8px;
+    }
+
+    tr:nth-child(odd) {
+        background-color: #eefeff;
+    }
+
+    tr:hover {
+        background-color: rgb(5,129,162);
+    }
+
+    body {
+        background-color: rgb(233, 240, 241);
+        border-radius: 25px;
+    }
+
+    #container {
+        padding: 15px;
+    }
+
+    #table-div {
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+
+    .searchBar {
+        border-radius: 10px;
+        height: 30px;
+        outline: none;
+    }
+
+    .md-form.mt-0 {
+        display:flex;
+        align-items: center;
+    }
+
+    .material-icons.mdc-button__icon{
+        position:absolute;
+    }
+
+    .mdc-button__icon + input{
+        padding-left: 40px;
+    }
+
+    .blueButton {
+        border-radius: 5px;
+        height: 37px;
+        background-color: rgb(0, 183, 255);
+        color: white;
+        font-weight: bold;
+        border: none;
+        width: 20%;
+        padding-left: 10px;
+    }
+
+    .iconify {
+        cursor: pointer;
+    }
+
+    #speech {
+        visibility: hidden;
+    }
+
+</style>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+<script src="https://code.iconify.design/2/2.0.3/iconify.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+
+<script>
+    $(function() {
+        $('#close').on('click', function(e) {
+            window.location.href = localStorage.getItem('prev_page')
+        })
+    })
+
+    function selected_workspace(workspace_id) {
+        localStorage.setItem('prev_page', location.href)
+        window.location.href = '/locations/select_error/' + workspace_id
+    }
+</script>
+
+<div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLongTitle">Which workspace did you click?</h5>
+        </div>
+        <div class="modal-body">
+            <div class="input-group">
+                <table>
+                    <tr>
+                        <th>Location name</th>
+                    </tr>
+                
+                    {% for workspace in workspaces %}
+                        <tr>
+                            <td style='cursor: pointer' onclick='selected_workspace(`{{workspace["id"]}}`)'><label style='cursor: pointer' onclick='selected_workspace(`{{workspace["id"]}}`)'>{{workspace['workspace_name']}}</label></td>
+                        </tr>
+                    {% endfor %}
+                </table><br><br>
+            </div><br>
+        </div>
+        <div class="modal-footer">
+            <button id='close' type="button" class="btn btn-secondary" data-dismiss="modal" style='background-color: red'>Close</button>
+        </div>
+    </div>
+</div>

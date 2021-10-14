@@ -14,9 +14,10 @@ app =  Flask(__name__)
 modal = Modal(app)
 api_url = "http://localhost:8080"
 
-
+#C8:A9:B8:65:67:EA
 address = (
-    "F5:68:22:6D:5D:9D"
+    #"F5:68:22:6D:5D:9D"
+    "DD:E6:08:45:EA:7D"
 )
 
 # connect to sphero bolt
@@ -53,24 +54,24 @@ async def calculate_distance(my_sphero, action_collection):
         action_backup = action_collection
 
         for looping in range(2):
-            if distance > 1.56:
-                passed_distance = math.floor(distance/1.56)
-                distance -= 1.56*passed_distance
+            if distance > 1.20:
+                passed_distance = math.floor(distance/1.20)
+                distance -= 1.20*passed_distance
                 await asyncio.sleep(2)
-                for index in range(passed_distance-1):
-                    await my_sphero.roll(255, heading)
+                for index in range(passed_distance):
+                    await my_sphero.roll(200, heading)
                     await asyncio.sleep(2)
 
             else:
                 while distance >= 0:
-                    time = math.floor(distance/0.22)
-                    #handle remainder of distance
-                    if time <= 0:
-                        time = 1
-                    distance -= time*0.22
+                    time = math.floor(distance/0.50) + 1
+                    # #handle remainder of distance
+                    # if time <= 0:
+                    #     time = 1
+                    distance -= time*0.50
                     await asyncio.sleep(2)
-                    for i in range(time-1):
-                        await my_sphero.roll(35, heading)
+                    for i in range(time):
+                        await my_sphero.roll(100, heading)
                         await asyncio.sleep(2)
     print("returning")
     asyncio._set_running_loop(await calculate_reverse_distance(my_sphero, action_backup))
@@ -85,24 +86,24 @@ async def calculate_reverse_distance(my_sphero, action_collection):
         action_backup = action_collection
 
         for looping in range(2):
-            if distance > 1.56:
-                passed_distance = math.floor(distance/1.56)
-                distance -= 1.56*passed_distance
+            if distance > 1.20:
+                passed_distance = math.floor(distance/1.20)
+                distance -= 1.20*passed_distance
                 await asyncio.sleep(2)
-                for index in range(passed_distance-1):
-                    await my_sphero.roll(255, heading)
+                for index in range(passed_distance):
+                    await my_sphero.roll(200, heading)
                     await asyncio.sleep(2)
 
             else:
                 while distance >= 0:
-                    time = math.floor(distance/0.22)
+                    time = math.floor(distance/0.50) + 1
                     #handle remainder of distance
-                    if time <= 0:
-                        time = 1
-                    distance -= time*0.22
+                    # if time <= 0:
+                    #     time = 1
+                    distance -= time*0.50
                     await asyncio.sleep(2)
-                    for i in range(time-1):
-                        await my_sphero.roll(35, heading)
+                    for i in range(time):
+                        await my_sphero.roll(100, heading)
                         await asyncio.sleep(2)
     await my_sphero.disconnect()
     return
@@ -119,8 +120,18 @@ def workspaces():
     json_string = response.json()
     return render_template("create-environment.html", workspaces = json_string)
 
-@app.route('/workspaces', methods=['GET', 'POST'])
-def workspaces():
+@app.route('/locations/select_error', methods=['GET', 'POST'])
+def locations_select_error():
+    response = requests.get(api_url+"/workspaces")
+    json_string = response.json()
+    return render_template("edit-environment-on-error-table.html", workspaces = json_string)
+
+@app.route('/locations/select_error/<workspace_id>', methods=['GET', 'POST'])
+def locations_select_error_clicked(workspace_id):
+    return render_template("edit-environment-on-error.html", id = workspace_id)
+
+@app.route('/workspaces/on_error', methods=['GET', 'POST'])
+def workspaces_on_error():
     return render_template("create-environment-on-error.html")
 
 @app.route('/workspaces/create/<workspace_name>', methods=['GET', 'POST'])
@@ -230,7 +241,7 @@ def page_not_found(e):
     return redirect('/')
 
 @app.errorhandler(500)
-def page_not_found(e):
+def empty_element_detected(e):
     return render_template('error-handle.html')
 
 if __name__ == "__main__":

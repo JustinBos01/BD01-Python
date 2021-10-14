@@ -1,0 +1,42 @@
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+<script src="https://code.iconify.design/2/2.0.3/iconify.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+
+<script>
+    $(function() {
+        $('#create-workspace').on('click', function(e) {
+            workspace_name = document.getElementById('name-new-workspace').value
+            if (workspace_name != '') {
+                window.location.href = '/workspaces/create/' + workspace_name
+            }
+        })
+    })
+
+    $(function() {
+        $('#close').on('click', function(e) {
+            window.location.href = localStorage.getItem('prev_page')
+        })
+    })
+</script>
+
+<div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLongTitle">Creating your first workspace</h5>
+        </div>
+        <div class="modal-body">
+            <div class="input-group">
+                <div class="input-group-prepend">
+                    <span class="input-group-text">Workspace Name</span>
+                </div>
+                <textarea id='name-new-workspace' class="form-control" aria-label="With textarea" placeholder="Workspace Name here..."></textarea>
+            </div><br>
+        </div>
+        <div class="modal-footer">
+            <button id='close' type="button" class="btn btn-secondary" data-dismiss="modal" style='background-color: red'>Close</button>
+            <button id='create-workspace' type="button" class="btn btn-primary">Create Workspace</button>
+        </div>
+    </div>
+</div>
