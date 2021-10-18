@@ -1,0 +1,349 @@
+<style>
+    html {
+        background-color: rgb(59, 72, 75);
+    }
+
+    table {
+        font-family: arial, sans-serif;
+        border-collapse: collapse;
+        width: 100%;
+        align-self: center; 
+    }
+
+    tr {
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+
+    th {
+        background-color: white;
+        color: rgb(2, 189, 202);
+        text-align: left;
+        padding: 8px;
+    }
+
+    td {
+        text-align: left;
+        padding: 8px;
+    }
+
+    tr:nth-child(odd) {
+        background-color: #eefeff;
+    }
+
+    tr:hover {
+        background-color: rgb(5,129,162);
+    }
+
+    body {
+        background-color: rgb(233, 240, 241);
+        border-radius: 25px;
+    }
+
+    #container {
+        padding: 15px;
+    }
+
+    #table-div {
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+
+    .searchBar {
+        border-radius: 10px;
+        height: 30px;
+        outline: none;
+    }
+
+    .md-form.mt-0 {
+        display:flex;
+        align-items: center;
+    }
+
+    .material-icons.mdc-button__icon{
+        position:absolute;
+    }
+
+    .mdc-button__icon + input{
+        padding-left: 40px;
+    }
+
+    .blueButton {
+        border-radius: 5px;
+        height: 37px;
+        background-color: rgb(0, 183, 255);
+        color: white;
+        font-weight: bold;
+        border: none;
+        width: 20%;
+        padding-left: 10px;
+    }
+
+    .iconify {
+        cursor: pointer;
+    }
+
+    #speech {
+        visibility: hidden;
+    }
+
+</style>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+<script src="https://code.iconify.design/2/2.0.3/iconify.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+
+<script type=text/javascript>
+    var counter = 0;
+    var stop_condition = false;
+
+    $(function() {
+        $('#create-route').on('click', function(e) {
+            route_id = document.getElementById('inputCreateRouteId').value
+            route_name = document.getElementById('inputCreateName').value
+            route_angle = document.getElementById('inputCreateAngle').value
+            route_distance = document.getElementById('inputCreateDistance').value
+            if (route_name != '' && route_angle != null && route_distance != null) {
+                window.location.href = '/route/create/' + route_id + '/' + route_name + '/' + route_angle + '/' + route_distance
+            }
+        })
+    })
+
+    function delete_route(id) {
+        //console.log('/route/delete/'+id)
+        window.location.href = '/route/delete/'+id
+    }
+
+    function speech_roll(routes){
+        var SpeechRecognition = SpeechRecognition || webkitSpeechRecognition;
+        var recognition = new SpeechRecognition();
+                    
+        // This runs when the speech recognition service starts
+        recognition.onstart = function() {
+            if (counter == 0) {
+                counter += 1
+                $('#speech').css({
+                    'visibility': 'visible'
+                });
+                $('#no-speech').css({
+                    'visibility': 'hidden'
+                });
+                console.log("We are listening. Try speaking into the microphone.");
+            } else {
+                counter = 0
+            }
+        };
+
+        recognition.onspeechend = function() {
+            // when user is done speaking
+            console.log("Canceling voice control...")
+            $('#speech').css({
+                'visibility': 'hidden'
+            });
+            $('#no-speech').css({
+                'visibility': 'visible'
+            });
+            recognition.stop();
+        }
+                    
+        // This runs when the speech recognition service returns result
+        recognition.onresult = function() {
+            var transcript = event.results[0][0].transcript;
+            var confidence = event.results[0][0].confidence;
+            while (true) {
+                routes = routes.replace("'", `"`)
+                if (routes.includes("'") == false) {
+                    break
+                }
+            }
+            routes = JSON.parse(routes)
+
+            for (let i of routes) {
+                if (transcript == i.route_name) {
+                    go_to_location(i.route_id)
+                } else {
+                    console.log('No route found for ' + transcript)
+                }
+            }
+        }
+        recognition.start();
+        // start recognition
+        
+    }
+
+    $(function() {
+        $('#speech').on('click', function(e) {
+            $('#speech').css({
+                'visibility': 'hidden'
+            });
+            $('#no-speech').css({
+                'visibility': 'visible'
+            });
+        })
+    })
+
+    $(function() {
+        $('#no-speech').on('click', function(e) {
+            $('#speech').css({
+                'visibility': 'visible'
+            });
+            $('#no-speech').css({
+                'visibility': 'hidden'
+            });
+        })
+    })
+    
+    function update_route(id) {
+        name = document.getElementById('inputEditName'+id).value
+        angle = document.getElementById('inputEditAngle'+id).value
+        distance = document.getElementById('inputEditDistance'+id).value
+        //console.log("/route/update/"+id+"/"+name+"/"+angle+"/"+distance)
+        window.location.href = "/route/update/"+id+"/"+name+"/"+angle+"/"+distance
+    }
+
+    function route_locations(id) {
+        window.location.href = '/locations/'+id
+    }
+
+    function go_to_location(id) {
+        //console.log('/roll/route/' + id)
+        window.location.href = '/roll/route/' + id
+    }
+    
+    function test(id) {
+        window.location.href = 'set/checkpoint/' + id
+    }
+</script>
+
+<html>
+    {% block content %}
+    <body>
+        <div id="container">
+            <div id="table-div">
+                <div class='wrapper'>
+                    <div class="md-form mt-0" style='padding-right: 5px; width: 100%;'>
+                        <div style="width: 100%">
+                            <span id='speech' onclick='speech_roll(`{{routes}}`)'  class="iconify speech" data-icon="ant-design:audio-filled" style="color: #1aa9d9;" data-width="32" data-height="32" style="visibility: 'hidden';"></span>
+                            <span id='no-speech' onclick='speech_roll(`{{routes}}`)' class="iconify" data-icon="ant-design:audio-muted-outlined" style="color: gray;" data-width="32" data-height="32" style="visibility: 'visible';"></span>
+                            <!-- <div style="padding-right: 10px; width: 100%; float: left; display: inline;">
+                                <span class="iconify material-icons mdc-button__icon" data-icon="ant-design:search-outlined"></span>
+                                <input placeholder="Search locations..." aria-label="Search" class="form-control"  type="text" style='width: 80%; height: 40px;'>
+                            </div> -->
+                            <button class='blueButton' type="button" data-toggle="modal" data-target="#createrouteModal" style='padding-left: 10px; height: 40px;  float: left; display: inline; position: fixed; right: 25px'>+ Add route </button>
+                        </div>
+                    </div><br>
+                </div>
+                <table>
+                    <tr>
+                        <th>Route</th>
+                        <th>Checkpoint</th>
+                        <th>Name</th>
+                        <th>Angle</th>
+                        <th>Distance</th>
+                        <th>Actions</th>
+                    </tr>
+                
+                    {% for route in routes %}
+                        <tr>
+                            <td id="route-id-{{route['id']}}-{{route['Route_id']}}">Route {{route['Route_id']}}</td>
+                            <td id="id-{{route['id']}}">Checkpoint {{route['id']}}</td>
+                            <td>{{route['name']}}</td>
+                            <td>{{route['angle']}}</td>
+                            <td>{{route['distance']}}</td>
+                            <td>
+                                <span id="edit" data-toggle="modal" data-target="#editRouteModal{{route['id']}}" class="iconify" data-icon="akar-icons:edit" style="color: blue;"></span>
+                                <span id="delete" class="iconify" data-icon="ant-design:delete-filled" onclick="delete_route(`{{route['id']}}`)"></span>
+                                <span id='roll' class="iconify" data-icon="ant-design:arrow-right-outlined" style="color: green;" onclick="go_to_location(`{{route['Route_id']}}`)"></span>
+                                <!-- <span id='roll' class="iconify" data-icon="ant-design:arrow-right-outlined" style="color: green;" onclick="test(`{{route['id']}}`)"></span> -->
+                            </td>
+                        </tr>
+                        <div class="modal fade" id="editRouteModal{{route['id']}}" tabindex="-1" role="dialog" aria-labelledby="editRouteModalCenterTitle{{route['id']}}" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="exampleModalLongTitle">Edit step {{route['id']}}</h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <div class="form-group row">
+                                            <label for="inputEditName" class="col-sm-2 col-form-label">Name</label>
+                                            <div class="col-sm-10">
+                                                <input class="form-control" id="inputEditName{{route['id']}}" placeholder="Name here...">
+                                            </div>
+                                        </div>
+                                        <div class="form-group row">
+                                            <label for="inputEditAngle" class="col-sm-2 col-form-label">Angle</label>
+                                            <div class="col-sm-10">
+                                                <input type="number" min='0' max='359' class="form-control" id="inputEditAngle{{route['id']}}" placeholder="Angle here..." onchange="this.value = this.value.replace(/,/g, '.')">
+                                            </div>
+                                        </div>
+                                        <div class="form-group row">
+                                            <label for="inputEditDistance" class="col-sm-2 col-form-label">Distance</label>
+                                            <div class="col-sm-10">
+                                                <input type="number" min='0' class="form-control" id="inputEditDistance{{route['id']}}" placeholder="Distance here..." onchange="this.value = this.value.replace(/,/g, '.')">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-dismiss="modal" style='background-color: red'>Close</button>
+                                        <button id='update-workspace' type="button" class="btn btn-primary" onclick="update_route(`{{route['id']}}`)">Save Route</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </table><br><br>
+                <!-- Modal -->
+                
+            </div>
+        </div>
+
+    </body>
+    <!-- Modal -->
+    <div class="modal fade" id="createrouteModal" tabindex="-1" role="dialog" aria-labelledby="createrouteModalCenterTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLongTitle">Create route</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group row">
+                        <label for="inputCreateRouteId" class="col-sm-2 col-form-label">Route Nr</label>
+                        <div class="col-sm-10">
+                            <input class="form-control" id="inputCreateRouteId" placeholder="Route Number here...">
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label for="inputCreateName" class="col-sm-2 col-form-label">Name</label>
+                        <div class="col-sm-10">
+                            <input class="form-control" id="inputCreateName" placeholder="Name here...">
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label for="inputCreateAngle" class="col-sm-2 col-form-label">Angle</label>
+                        <div class="col-sm-10">
+                            <input type="number" min='0' max='359' class="form-control" id="inputCreateAngle" placeholder="Angle here..." onchange="this.value = this.value.replace(/,/g, '.')">
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label for="inputCreateDistance" class="col-sm-2 col-form-label">Distance</label>
+                        <div class="col-sm-10">
+                            <input type="number" min='0' class="form-control" id="inputCreateDistance" placeholder="Distance here..." onchange="this.value = this.value.replace(/,/g, '.')">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal" style='background-color: red'>Close</button>
+                    <button id='create-route' type="button" class="btn btn-primary">Create Route</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endblock %}
+</html>
