@@ -101,11 +101,12 @@
     $(function() {
         $('#create-route').on('click', function(e) {
             route_id = document.getElementById('inputCreateRouteId').value
+            checkpoint_id = document.getElementById('inputCreateId').value
             route_name = document.getElementById('inputCreateName').value
             route_angle = document.getElementById('inputCreateAngle').value
             route_distance = document.getElementById('inputCreateDistance').value
             if (route_name != '' && route_angle != null && route_distance != null) {
-                window.location.href = '/route/create/' + route_id + '/' + route_name + '/' + route_angle + '/' + route_distance
+                window.location.href = '/route/create/' + route_id + '/' + checkpoint_id + '/' + route_name + '/' + route_angle + '/' + route_distance
             }
         })
     })
@@ -211,8 +212,12 @@
         window.location.href = '/roll/route/' + id
     }
     
-    function test(id) {
+    function add_checkpoint(id) {
         window.location.href = 'set/checkpoint/' + id
+    }
+
+    function remove_checkpoint(id) {
+        window.location.href = 'remove/checkpoint/' + id
     }
 </script>
 
@@ -254,8 +259,9 @@
                             <td>
                                 <span id="edit" data-toggle="modal" data-target="#editRouteModal{{route['id']}}" class="iconify" data-icon="akar-icons:edit" style="color: blue;"></span>
                                 <span id="delete" class="iconify" data-icon="ant-design:delete-filled" onclick="delete_route(`{{route['id']}}`)"></span>
+                                <span class="iconify" data-icon="akar-icons:circle-plus" style="color: green;" onclick="add_checkpoint(`{{route['id']}}`)"></span>
+                                <span class="iconify" data-icon="akar-icons:circle-minus" style="color: #ff3e30;" onclick="remove_checkpoint(`{{route['id']}}`)"></span>
                                 <span id='roll' class="iconify" data-icon="ant-design:arrow-right-outlined" style="color: green;" onclick="go_to_location(`{{route['Route_id']}}`)"></span>
-                                <!-- <span id='roll' class="iconify" data-icon="ant-design:arrow-right-outlined" style="color: green;" onclick="test(`{{route['id']}}`)"></span> -->
                             </td>
                         </tr>
                         <div class="modal fade" id="editRouteModal{{route['id']}}" tabindex="-1" role="dialog" aria-labelledby="editRouteModalCenterTitle{{route['id']}}" aria-hidden="true">
@@ -269,11 +275,23 @@
                                     </div>
                                     <div class="modal-body">
                                         <div class="form-group row">
+                                            <label for="inputEditRouteId" class="col-sm-2 col-form-label">Route Nr</label>
+                                            <div class="col-sm-10">
+                                                <input class="form-control" id="inputEditRouteId{{route['id']}}" placeholder="Route Nr here...">
+                                            </div>
+                                        </div> 
+                                        <div class="form-group row">
+                                            <label for="inputEditId" class="col-sm-2 col-form-label">Checkpoint Nr</label>
+                                            <div class="col-sm-10">
+                                                <input class="form-control" id="inputEditId{{route['id']}}" placeholder="Checkpoint Nr here...">
+                                            </div>
+                                        </div> 
+                                        <div class="form-group row">
                                             <label for="inputEditName" class="col-sm-2 col-form-label">Name</label>
                                             <div class="col-sm-10">
                                                 <input class="form-control" id="inputEditName{{route['id']}}" placeholder="Name here...">
                                             </div>
-                                        </div>
+                                        </div> 
                                         <div class="form-group row">
                                             <label for="inputEditAngle" class="col-sm-2 col-form-label">Angle</label>
                                             <div class="col-sm-10">
@@ -297,7 +315,6 @@
                     {% endfor %}
                 </table><br><br>
                 <!-- Modal -->
-                
             </div>
         </div>
 
@@ -317,6 +334,12 @@
                         <label for="inputCreateRouteId" class="col-sm-2 col-form-label">Route Nr</label>
                         <div class="col-sm-10">
                             <input class="form-control" id="inputCreateRouteId" placeholder="Route Number here...">
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label for="inputCreateId" class="col-sm-2 col-form-label">Checkpoint Nr</label>
+                        <div class="col-sm-10">
+                            <input class="form-control" id="inputCreateId" placeholder="Checkpoint Number here...">
                         </div>
                     </div>
                     <div class="form-group row">

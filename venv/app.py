@@ -15,7 +15,7 @@ app =  Flask(__name__)
 modal = Modal(app)
 api_url = "http://localhost:8080"
 
-checkpoints = []
+stop_at_checkpoints = []
 
 #C8:A9:B8:65:67:EA
 address = (
@@ -39,14 +39,12 @@ async def sphero_roll(my_sphero, actions):
     await my_sphero.resetYaw()
 
     for i in actions:
+        checkpoint = i['step']
         distance = i['distance']
         heading = i['heading']
         while distance > 0:
-            #print(str(distance) +' '+ str(heading))
-            # at 100 speed = 1 iteration --> 0.695 meter
             if distance >= 0.695:
                 time = int(distance//0.695)
-                print(time)
                 distance -= 0.695*time
 
                 for iteration in range(time):
@@ -54,7 +52,6 @@ async def sphero_roll(my_sphero, actions):
                     await my_sphero.roll(100, heading)
                     await asyncio.sleep(2)
 
-            # at 65 speed = 1 iteration --> 0.49 meter
             if distance >= 0.49:
                 time = int(distance//0.49)
                 print(time)
@@ -65,17 +62,20 @@ async def sphero_roll(my_sphero, actions):
                     await my_sphero.roll(65, heading)
                     await asyncio.sleep(2)
             
-            
-            else:
-                time = int(distance//0.195)
+            elif distance >= 0.2 and ((distance <= 0.05)== False):
+                time = int(distance//0.2)
                 if time == 0:
                     time = 1
-                distance -= 0.195*time
+                distance -= 0.2*time
 
                 for iteration in range(time):
                     await asyncio.sleep(2)
-                    await my_sphero.roll(40, heading)
+                    await my_sphero.roll(50, heading)
                     await asyncio.sleep(2)
+            
+            else:
+                distance = 0
+        
             
         if action_nr < len(actions):
             next_heading = actions[action_nr]['heading']
@@ -88,160 +88,10 @@ async def sphero_roll(my_sphero, actions):
             await asyncio.sleep(2)
             await my_sphero.roll(65, heading)
             await asyncio.sleep(2)
-    return
-
-async def calculate_distance(my_sphero, action_collection):
-    next_heading = None
-    corner_check = 0
-    time = 0
-
-    print(action_collection)
-    await my_sphero.connect()
-    await my_sphero.wake()
-    await my_sphero.resetYaw()
-    for i in action_collection:
-        corner_check += 1
-        distance = i['distance']
-        heading = i['heading']
-        while distance > 0:
-            #print(distance)
-
-            # print(str(distance) + " | " + str(i['distance']))
-
-            if distance >= (0.695):
-                #print('100 speed ' + str(distance))
-                time = distance//0.695
-                distance -= 0.695*time
-                await asyncio.sleep(2)
-                for index in range(time):
-                    await asyncio.sleep(2)
-                    await my_sphero.roll(100, heading)
-                    await asyncio.sleep(2)
-
-            if distance >= (0.49):
-                #print('65 speed ' + str(distance))
-                time = distance//0.49
-                distance -= time*0.49
-                await asyncio.sleep(2)
-                for i in range(time):
-                    await asyncio.sleep(2)
-                    await my_sphero.roll(65, heading)
-                    await asyncio.sleep(2)
-                    # print('65 speed ' + str(distance))
-
-            else:
-                # print('40 speed '+ str(distance))
-                # print(str(heading) + str(next_heading))
-                if heading == next_heading:
-                    time -= distance//0.195
-                    
-                if (heading != next_heading) or distance < 0.195:
-                    # print('corner')
-                    time -= distance//0.195+1
-                
-                distance -= time*0.195
-
-                for i in range(time):
-                    await asyncio.sleep(2)
-                    await my_sphero.roll(40, heading)
-                    await asyncio.sleep(2)
-            
-            if corner_check <= len(action_collection)-1:
-                next_heading = action_collection[corner_check]['heading']
-    return
-
-# async def calculate_distance(my_sphero, action_collection):
-#     next_heading = None
-#     corner_check = 0
-
-#     print(action_collection)
-#     await my_sphero.connect()
-#     await my_sphero.wake()
-#     await my_sphero.resetYaw()
-#     await my_sphero.roll(65, 90)
-#     await asyncio.sleep(2)
-#     await asyncio.sleep(1)
-#     return
-
-async def calculate_reverse_distance(my_sphero, action_collection):
-    next_heading = None
-    corner_check = 0
-
-    for i in reversed(action_collection):
-        corner_check += 1
-        distance = i['distance']
-        heading = i['heading']+180
-        if heading >= 360:
-            heading -= 360
-        action_backup = action_collection
-
-        for looping in range(2):
-            if distance > 0.87:
-                passed_distance = math.floor(distance/0.87)
-                distance -= 0.87*passed_distance
-                await asyncio.sleep(2)
-                for index in range(passed_distance):
-                    await my_sphero.roll(100, heading)
-                    await asyncio.sleep(2)
-
-            else:
-                while distance >= 0:
-                    if heading == next_heading:
-                        time = math.floor(distance/0.50)
-                    else:
-                        time = math.floor(distance/0.50) + 1
-
-                    #handle remainder of distance
-                    # if time <= 0:
-                    #     time = 1
-                    distance -= time*0.50
-                    await asyncio.sleep(2)
-                    for i in range(time):
-                        await my_sphero.roll(65, heading)
-                        await asyncio.sleep(2)
-            if corner_check <= len(action_collection)-1:
-                next_heading = action_collection[corner_check]
+        
+        if (stop_at_checkpoints.__contains__(str(checkpoint))):
+            await asyncio.sleep(10)
     await my_sphero.disconnect()
-    return
-
-def roll(action_collection):
-    next_heading = None
-    corner_check = 0
-    time = 0
-
-    for i in action_collection:
-        corner_check += 1
-        distance = i['distance']
-        heading = i['heading']
-        #print(str(distance) + " | " + str(i['distance']))
-
-        while distance >= 0:
-            
-
-            if distance >= (0.695):
-            #  and heading != next_heading:
-                print('100 speed ' + str(distance))
-                passed_distance = math.floor(distance/0.695)
-                distance -= 0.695*passed_distance
-
-            elif distance >= (0.49):
-                print('65 speed ' + str(distance) + " " + str(i['distance']))
-                time = math.floor(distance/0.49)
-                distance -= time*0.49
-
-            else:
-                print('40 speed '+ str(distance))
-                if heading != next_heading:
-                    time -= math.floor(distance/0.195)
-                    distance -= time*0.195
-
-                if (heading == next_heading and time == 0) or distance < 0.195:
-                    print('corner')
-                    time = 2
-                    #19.5cm
-                    distance -= time*0.195
-            if corner_check <= len(action_collection)-1:
-                next_heading = action_collection[corner_check]
     return
 
 def get_step(route):
@@ -349,9 +199,9 @@ def route():
     json_string.sort(key=get_route)
     return render_template("full-route.html", routes = json_string)
 
-@app.route('/route/create/<route_id>/<name>/<angle>/<distance>', methods=['GET','POST'])
-def create_route(route_id, name, angle, distance):
-    json_string = {"route_id": int(route_id), "name": name, "angle": int(angle), "distance": float(distance)}
+@app.route('/route/create/<route_id>/<id>/<name>/<angle>/<distance>', methods=['GET','POST'])
+def create_route(route_id, id, name, angle, distance):
+    json_string = {"route_id": int(route_id), "id": int(id), "name": name, "angle": int(angle), "distance": float(distance)}
     response = requests.get(api_url+"/route/insert", json=json_string)
     return redirect('/')
 
@@ -368,29 +218,57 @@ def update_route(id, name, angle, distance):
     return redirect('/')
 
 @app.route('/roll/route/<route_id>')
+
+
+
 def roll_route(route_id):
     json_string = { 'route_id': int(route_id) }
     response = requests.get(api_url+"/route/by_id", json=json_string)
     route_data = response.json()
     route = []
-    try:
-        for i in route_data:
-            route.append({
-                "step": i['id'],
-                "distance": i['distance'],
-                "heading": i['angle']
-            })
+    counter = 0
+    # try:
+    for i in route_data:
+        # if route != []:
+        #     if i['angle'] == route[-1]['heading']:
+        #         route[-1]['distance'] += i['distance']
+        #         print('toevoegen', route)
+        #     else:
+        #         route.append({
+        #             "step": i['id'],
+        #             "distance": i['distance'],
+        #             "heading": i['angle']
+        #         })
+        # else:
+        route.append({
+            "step": i['id'],
+            "distance": i['distance'],
+            "heading": i['angle']
+        })
         route.sort(key=get_step)
-    except:
-        print('Empty route')
+    # except:
+    #     print('Empty route')
     print(route)
-    roll(route)
     
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
     loop.set_debug(True)
     loop.run_until_complete(sphero_roll(my_sphero, route))
     return redirect('/')
+
+# def jimmy(route_id)
+#     json_string = { 'route_id': int(route_id) }
+#     response = requests.get(api_url+"/route/by_id", json=json_string)
+#     route_data = response.json()
+
+#     for k in range(len(stop_at_checkpoints)):
+#         start_of_sum = int(stop_at_checkpoints[k])-1
+#         for i in range(1)
+
+#         stop_at_checkpoints
+#         route_data[0]['distance']
+#         route = []
+#         counter = 0
 
 @app.route('/roll/<workspace_id>')
 def roll_workspace(workspace_id):
@@ -431,10 +309,18 @@ async def from_mic():
     await asyncio.sleep(10)
     return redirect('/')
 
-@app.route('/set/checkpoint/<variable>')
-def global_var_test(variable):
-    checkpoints.append(variable)
-    print(checkpoints)
+@app.route('/set/checkpoint/<checkpoint>')
+def add_checkpoint(checkpoint):
+    if stop_at_checkpoints.__contains__(checkpoint) == False:
+        stop_at_checkpoints.append(checkpoint)
+        print(stop_at_checkpoints)
+    return redirect('/')
+
+@app.route('/remove/checkpoint/<checkpoint>')
+def remove_checkpoint(checkpoint):
+    if stop_at_checkpoints.__contains__(checkpoint):
+        stop_at_checkpoints.remove(checkpoint)
+        print(stop_at_checkpoints)
     return redirect('/')
 
 @app.errorhandler(404)
