@@ -97,6 +97,7 @@
 <script type=text/javascript>
     var counter = 0;
     var stop_condition = false;
+    var run_route;
 
     $(function() {
         $('#create-route').on('click', function(e) {
@@ -105,8 +106,18 @@
             route_name = document.getElementById('inputCreateName').value
             route_angle = document.getElementById('inputCreateAngle').value
             route_distance = document.getElementById('inputCreateDistance').value
+            alt_route = document.getElementById('inputCreateAltRoute').value
+            alt_route_id = document.getElementById('inputCreateAltRouteId').value
+            if (alt_route == "") {
+                alt_route = 0
+            }
+            if (alt_route_id == "") {
+                alt_route_id = 0
+            }
+
             if (route_name != '' && route_angle != null && route_distance != null) {
-                window.location.href = '/route/create/' + route_id + '/' + checkpoint_id + '/' + route_name + '/' + route_angle + '/' + route_distance
+                window.location.href = '/route/create/' + route_id + '/' + checkpoint_id + '/' + route_name + '/' + route_angle + '/' + route_distance + '/' + alt_route + '/' + alt_route_id
+                //console.log('/route/create/' + route_id + '/' + checkpoint_id + '/' + route_name + '/' + route_angle + '/' + route_distance + '/' + alt_route + '/' + alt_route_id)
             }
         })
     })
@@ -146,12 +157,15 @@
                 'visibility': 'visible'
             });
             recognition.stop();
+            return
         }
                     
         // This runs when the speech recognition service returns result
         recognition.onresult = function() {
             var transcript = event.results[0][0].transcript;
             var confidence = event.results[0][0].confidence;
+            // console.log(transcript)
+            
             while (true) {
                 routes = routes.replace("'", `"`)
                 if (routes.includes("'") == false) {
@@ -160,11 +174,26 @@
             }
             routes = JSON.parse(routes)
 
+            transcript = transcript.toLowerCase()
+            // console.log(transcript)
+            console.log($('#my-data').data())
+            
+            if (transcript == "go" || transcript == "run" || transcript == "roll") {
+                for (let i of routes) {
+                    if ($('#my-data').data().name != null) {
+                        if ($('#my-data').data().name[0] == i.id) {
+                            go_to_location(i.Route_id)
+                        }
+                    } else {
+                        console.log("No route was given")
+                    }
+                }
+            }
+
             for (let i of routes) {
-                if (transcript == i.route_name) {
-                    go_to_location(i.route_id)
-                } else {
-                    console.log('No route found for ' + transcript)
+                if (transcript == i.name.toLowerCase()) {
+                    add_checkpoint(i.id)
+                    return
                 }
             }
         }
@@ -195,12 +224,17 @@
         })
     })
     
-    function update_route(id) {
+    function update_route(id, route_id) {
+        //<new_id>/<new_route>/<name>/<angle>/<distance>/<id>/<route_id>/<alt_route>/<alt_route_id>
+        new_id = document.getElementById('inputEditId'+id).value
+        new_route = document.getElementById('inputEditRouteId'+id).value
         name = document.getElementById('inputEditName'+id).value
         angle = document.getElementById('inputEditAngle'+id).value
         distance = document.getElementById('inputEditDistance'+id).value
+        alt_route = document.getElementById('inputEditAltRoute'+id).value
+        alt_route_id = document.getElementById('inputEditAltRouteId'+id).value
         //console.log("/route/update/"+id+"/"+name+"/"+angle+"/"+distance)
-        window.location.href = "/route/update/"+id+"/"+name+"/"+angle+"/"+distance
+        window.location.href = "/route/update/"+new_id+"/"+new_route+"/"+name+"/"+angle+"/"+distance+"/"+id+"/"+route_id+"/"+alt_route+"/"+alt_route_id
     }
 
     function route_locations(id) {
@@ -222,7 +256,6 @@
 </script>
 
 <html>
-    {% block content %}
     <body>
         <div id="container">
             <div id="table-div">
@@ -239,86 +272,128 @@
                         </div>
                     </div><br>
                 </div>
-                <table>
-                    <tr>
-                        <th>Route</th>
-                        <th>Checkpoint</th>
-                        <th>Name</th>
-                        <th>Angle</th>
-                        <th>Distance</th>
-                        <th>Actions</th>
-                    </tr>
-                
-                    {% for route in routes %}
-                        <tr>
-                            <td id="route-id-{{route['id']}}-{{route['Route_id']}}">Route {{route['Route_id']}}</td>
-                            <td id="id-{{route['id']}}">Checkpoint {{route['id']}}</td>
-                            <td>{{route['name']}}</td>
-                            <td>{{route['angle']}}</td>
-                            <td>{{route['distance']}}</td>
-                            <td>
-                                <span id="edit" data-toggle="modal" data-target="#editRouteModal{{route['id']}}" class="iconify" data-icon="akar-icons:edit" style="color: blue;"></span>
-                                <span id="delete" class="iconify" data-icon="ant-design:delete-filled" onclick="delete_route(`{{route['id']}}`)"></span>
-                                <span class="iconify" data-icon="akar-icons:circle-plus" style="color: green;" onclick="add_checkpoint(`{{route['id']}}`)"></span>
-                                <span class="iconify" data-icon="akar-icons:circle-minus" style="color: #ff3e30;" onclick="remove_checkpoint(`{{route['id']}}`)"></span>
-                                <span id='roll' class="iconify" data-icon="ant-design:arrow-right-outlined" style="color: green;" onclick="go_to_location(`{{route['Route_id']}}`)"></span>
-                            </td>
-                        </tr>
-                        <div class="modal fade" id="editRouteModal{{route['id']}}" tabindex="-1" role="dialog" aria-labelledby="editRouteModalCenterTitle{{route['id']}}" aria-hidden="true">
-                            <div class="modal-dialog modal-dialog-centered" role="document">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title" id="exampleModalLongTitle">Edit step {{route['id']}}</h5>
-                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                            <span aria-hidden="true">&times;</span>
-                                        </button>
-                                    </div>
-                                    <div class="modal-body">
-                                        <div class="form-group row">
-                                            <label for="inputEditRouteId" class="col-sm-2 col-form-label">Route Nr</label>
-                                            <div class="col-sm-10">
-                                                <input class="form-control" id="inputEditRouteId{{route['id']}}" placeholder="Route Nr here...">
+                {% block content %}
+                    {% if routes != [] %}
+                        <table>
+                            <tr>
+                                <th>Route</th>
+                                <th>Checkpoint</th>
+                                <th>Name</th>
+                                <th>Angle</th>
+                                <th>Distance</th>
+                                <th>Alternative route | From step</th>
+                                <th>Actions</th>
+                            </tr>
+                        
+                            {% for route in routes %}
+                                <tr>
+                                    <td id="route-id-{{route['id']}}-{{route['Route_id']}}">Route {{route['Route_id']}}</td>
+                                    <td id="id-{{route['id']}}">Checkpoint {{route['id']}}</td>
+                                    <td>{{route['name']}}</td>
+                                    <td>{{route['angle']}}</td>
+                                    <td>{{route['distance']}}</td>
+                                    {% if route['alt_route'] != 0 %}
+                                        <td>{{route['alt_route']}} | {{route['alt_route_id']}}</td>
+                                    {% else %}
+                                        <td>none</td>
+                                    {% endif %}
+
+                                    <td>
+                                        <span id="edit" data-toggle="modal" data-target="#editRouteModal{{route['id']}}" class="iconify" data-icon="akar-icons:edit" style="color: blue;"></span>
+                                        <span id="delete" class="iconify" data-icon="ant-design:delete-filled" onclick="delete_route(`{{route['id']}}`)"></span>
+                                        <span class="iconify" data-icon="akar-icons:circle-plus" style="color: green;" onclick="add_checkpoint(`{{route['id']}}`)"></span>
+                                        <span class="iconify" data-icon="akar-icons:circle-minus" style="color: #ff3e30;" onclick="remove_checkpoint(`{{route['id']}}`)"></span>
+                                        <span id='roll' class="iconify" data-icon="ant-design:arrow-right-outlined" style="color: green;" onclick="go_to_location(`{{route['Route_id']}}`)"></span>
+                                    </td>
+                                </tr>
+                                <div class="modal fade" id="editRouteModal{{route['id']}}" tabindex="-1" role="dialog" aria-labelledby="editRouteModalCenterTitle{{route['id']}}" aria-hidden="true">
+                                    <div class="modal-dialog modal-dialog-centered" role="document">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="exampleModalLongTitle">Edit step {{route['id']}}</h5>
+                                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                    <span aria-hidden="true">&times;</span>
+                                                </button>
                                             </div>
-                                        </div> 
-                                        <div class="form-group row">
-                                            <label for="inputEditId" class="col-sm-2 col-form-label">Checkpoint Nr</label>
-                                            <div class="col-sm-10">
-                                                <input class="form-control" id="inputEditId{{route['id']}}" placeholder="Checkpoint Nr here...">
+                                            <div class="modal-body">
+                                                <div class="form-group row">
+                                                    <label for="inputEditRouteId" class="col-sm-2 col-form-label">Route Nr</label>
+                                                    <div class="col-sm-10">
+                                                        <input class="form-control" id="inputEditRouteId{{route['id']}}" placeholder="Route Nr here...">
+                                                    </div>
+                                                </div>
+                                                <hr>
+                                                <div class="form-group row">
+                                                    <label for="inputEditId" class="col-sm-2 col-form-label">Checkpoint Nr</label>
+                                                    <div class="col-sm-10">
+                                                        <input class="form-control" id="inputEditId{{route['id']}}" placeholder="Checkpoint Nr here...">
+                                                    </div>
+                                                </div> 
+                                                <hr>
+                                                <div class="form-group row">
+                                                    <label for="inputEditName" class="col-sm-2 col-form-label">Name</label>
+                                                    <div class="col-sm-10">
+                                                        <input class="form-control" id="inputEditName{{route['id']}}" placeholder="Name here...">
+                                                    </div>
+                                                </div> 
+                                                <hr>
+                                                <div class="form-group row">
+                                                    <label for="inputEditAngle" class="col-sm-2 col-form-label">Angle</label>
+                                                    <div class="col-sm-10">
+                                                        <input type="number" min='0' max='359' class="form-control" id="inputEditAngle{{route['id']}}" placeholder="Angle here..." onchange="this.value = this.value.replace(/,/g, '.')">
+                                                    </div>
+                                                </div>
+                                                <hr>
+                                                <div class="form-group row">
+                                                    <label for="inputEditDistance" class="col-sm-2 col-form-label">Distance</label>
+                                                    <div class="col-sm-10">
+                                                        <input type="number" min='0' class="form-control" id="inputEditDistance{{route['id']}}" placeholder="Distance here..." onchange="this.value = this.value.replace(/,/g, '.')">
+                                                    </div>
+                                                </div>
+                                                <hr>
+                                                <div class="form-group row">
+                                                    <label for="inputEditAltRoute" class="col-sm-2 col-form-label">Alt Route</label>
+                                                    <div class="col-sm-10">
+                                                        <input type="number" min='0' class="form-control" id="inputEditAltRoute{{route['id']}}" placeholder="Alternative Route here... (can be empty)">
+                                                    </div>
+                                                </div>
+                                                <hr>
+                                                <div class="form-group row">
+                                                    <label for="inputEditAltRouteId" class="col-sm-2 col-form-label">From Step</label>
+                                                    <div class="col-sm-10">
+                                                        <input type="number" min='0' class="form-control" id="inputEditAltRouteId{{route['id']}}" placeholder="Alternative Step here... (can be empty)">
+                                                    </div>
+                                                </div>
                                             </div>
-                                        </div> 
-                                        <div class="form-group row">
-                                            <label for="inputEditName" class="col-sm-2 col-form-label">Name</label>
-                                            <div class="col-sm-10">
-                                                <input class="form-control" id="inputEditName{{route['id']}}" placeholder="Name here...">
-                                            </div>
-                                        </div> 
-                                        <div class="form-group row">
-                                            <label for="inputEditAngle" class="col-sm-2 col-form-label">Angle</label>
-                                            <div class="col-sm-10">
-                                                <input type="number" min='0' max='359' class="form-control" id="inputEditAngle{{route['id']}}" placeholder="Angle here..." onchange="this.value = this.value.replace(/,/g, '.')">
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-dismiss="modal" style='background-color: red'>Close</button>
+                                                <button id='update-workspace' type="button" class="btn btn-primary" onclick="update_route(`{{route['id']}}`, `{{route['Route_id']}}`)">Save Route</button>
                                             </div>
                                         </div>
-                                        <div class="form-group row">
-                                            <label for="inputEditDistance" class="col-sm-2 col-form-label">Distance</label>
-                                            <div class="col-sm-10">
-                                                <input type="number" min='0' class="form-control" id="inputEditDistance{{route['id']}}" placeholder="Distance here..." onchange="this.value = this.value.replace(/,/g, '.')">
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-secondary" data-dismiss="modal" style='background-color: red'>Close</button>
-                                        <button id='update-workspace' type="button" class="btn btn-primary" onclick="update_route(`{{route['id']}}`)">Save Route</button>
                                     </div>
                                 </div>
-                            </div>
-                        </div>
-                    {% endfor %}
-                </table><br><br>
+                            {% endfor %}
+                        </table><br><br>
+                    {% else %}
+                    <label>Empty Table</label>
+                    {% endif %}
+                    <meta id="my-data" data-name="{{stop_at_checkpoints}}" data-other="{{other}}">
                 <!-- Modal -->
             </div>
+            <label>Stopping at: </label>
+            {% if stop_at_checkpoints != [] %}
+                {% for checkpoint in stop_at_checkpoints %}
+                    <label>{{checkpoint}}</label>
+                {% endfor %}
+                {% else %}
+                    <label>None</label>
+                {% endif %}
+            {% endblock content %}
         </div>
-
+        
     </body>
+    
+
     <!-- Modal -->
     <div class="modal fade" id="createrouteModal" tabindex="-1" role="dialog" aria-labelledby="createrouteModalCenterTitle" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" role="document">
@@ -336,28 +411,46 @@
                             <input class="form-control" id="inputCreateRouteId" placeholder="Route Number here...">
                         </div>
                     </div>
+                    <hr>
                     <div class="form-group row">
                         <label for="inputCreateId" class="col-sm-2 col-form-label">Checkpoint Nr</label>
                         <div class="col-sm-10">
                             <input class="form-control" id="inputCreateId" placeholder="Checkpoint Number here...">
                         </div>
                     </div>
+                    <hr>
                     <div class="form-group row">
                         <label for="inputCreateName" class="col-sm-2 col-form-label">Name</label>
                         <div class="col-sm-10">
                             <input class="form-control" id="inputCreateName" placeholder="Name here...">
                         </div>
                     </div>
+                    <hr>
                     <div class="form-group row">
                         <label for="inputCreateAngle" class="col-sm-2 col-form-label">Angle</label>
                         <div class="col-sm-10">
                             <input type="number" min='0' max='359' class="form-control" id="inputCreateAngle" placeholder="Angle here..." onchange="this.value = this.value.replace(/,/g, '.')">
                         </div>
                     </div>
+                    <hr>
                     <div class="form-group row">
                         <label for="inputCreateDistance" class="col-sm-2 col-form-label">Distance</label>
                         <div class="col-sm-10">
                             <input type="number" min='0' class="form-control" id="inputCreateDistance" placeholder="Distance here..." onchange="this.value = this.value.replace(/,/g, '.')">
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="form-group row">
+                        <label for="inputCreateAltRoute" class="col-sm-2 col-form-label">Alt Route</label>
+                        <div class="col-sm-10">
+                            <input type="number" min='0' class="form-control" id="inputCreateAltRoute" placeholder="Alternative Route here... (can be empty)">
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="form-group row">
+                        <label for="inputCreateAltRouteId" class="col-sm-2 col-form-label">From Step</label>
+                        <div class="col-sm-10">
+                            <input type="number" min='0' class="form-control" id="inputCreateAltRouteId" placeholder="Alternative Step here... (can be empty)">
                         </div>
                     </div>
                 </div>
@@ -368,5 +461,5 @@
             </div>
         </div>
     </div>
-    {% endblock %}
+
 </html>

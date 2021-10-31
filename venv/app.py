@@ -15,15 +15,19 @@ app =  Flask(__name__)
 modal = Modal(app)
 api_url = "http://localhost:8080"
 
+rolling_route = []
 stop_at_checkpoints = []
+my_sphero = None
+run_route = 0
 
-#C8:A9:B8:65:67:EA
+# #C8:A9:B8:65:67:EA
 address = (
-    "F5:68:22:6D:5D:9D"
+    "D0:56:BC:B1:69:8B"
     #"DD:E6:08:45:EA:7D"
 )
 
 # connect to sphero bolt
+
 my_sphero = SpheroBolt(address)
 
 #65 speed = slow
@@ -42,15 +46,20 @@ async def sphero_roll(my_sphero, actions):
         checkpoint = i['step']
         distance = i['distance']
         heading = i['heading']
+        if action_nr < len(actions):
+            next_heading = actions[action_nr]['heading']
+                
         while distance > 0:
-            if distance >= 0.695:
-                time = int(distance//0.695)
-                distance -= 0.695*time
+            
+            if i['heading'] == next_heading or distance >= 0.695 + 0.49:
+                if distance >= 0.695:
+                    time = int(distance//0.695)
+                    distance -= 0.695*time
 
-                for iteration in range(time):
-                    await asyncio.sleep(2)
-                    await my_sphero.roll(100, heading)
-                    await asyncio.sleep(2)
+                    for iteration in range(time):
+                        await asyncio.sleep(2)
+                        await my_sphero.roll(100, heading)
+                        await asyncio.sleep(2)
 
             if distance >= 0.49:
                 time = int(distance//0.49)
@@ -75,7 +84,10 @@ async def sphero_roll(my_sphero, actions):
             
             else:
                 distance = 0
-        
+        # print(stop_at_checkpoints)
+        if (stop_at_checkpoints.__contains__(checkpoint)):
+            await asyncio.sleep(5)
+            print('stop')
             
         if action_nr < len(actions):
             next_heading = actions[action_nr]['heading']
@@ -89,8 +101,7 @@ async def sphero_roll(my_sphero, actions):
             await my_sphero.roll(65, heading)
             await asyncio.sleep(2)
         
-        if (stop_at_checkpoints.__contains__(str(checkpoint))):
-            await asyncio.sleep(10)
+        
     await my_sphero.disconnect()
     return
 
@@ -197,11 +208,16 @@ def route():
     json_string = response.json()
     json_string.sort(key=get_step_id)
     json_string.sort(key=get_route)
-    return render_template("full-route.html", routes = json_string)
+    return render_template("full-route.html", routes = json_string, stop_at_checkpoints = stop_at_checkpoints, run_route = run_route)
 
-@app.route('/route/create/<route_id>/<id>/<name>/<angle>/<distance>', methods=['GET','POST'])
-def create_route(route_id, id, name, angle, distance):
-    json_string = {"route_id": int(route_id), "id": int(id), "name": name, "angle": int(angle), "distance": float(distance)}
+@app.route('/route/create/<route_id>/<id>/<name>/<angle>/<distance>/<alt_route>/<alt_route_id>', methods=['GET','POST'])
+def create_route(route_id, id, name, angle, distance, alt_route, alt_route_id):
+    if alt_route == None:
+        alt_route = 0
+    if alt_route_id == None:
+        alt_route_id = 0
+    print(str(alt_route) + " | " + str(alt_route_id))
+    json_string = {"Route_id": int(route_id), "id": int(id), "name": name, "angle": int(angle), "distance": float(distance), "alt_route": int(alt_route), "alt_route_id": int(alt_route_id)}
     response = requests.get(api_url+"/route/insert", json=json_string)
     return redirect('/')
 
@@ -211,50 +227,73 @@ def delete_route(id):
     response = requests.delete(api_url+"/route/delete", json=json_string)
     return redirect('/')
     
-@app.route('/route/update/<id>/<name>/<angle>/<distance>', methods=['GET', 'POST'])
-def update_route(id, name, angle, distance):
-    json_string = { 'id': int(id), 'name': name, 'angle': int(angle), 'distance': float(distance)}
+@app.route('/route/update/<new_id>/<new_route>/<name>/<angle>/<distance>/<id>/<route_id>/<alt_route>/<alt_route_id>', methods=['GET', 'POST'])
+def update_route(new_id, new_route, name, angle, distance, id, route_id, alt_route, alt_route_id):
+    if alt_route == None:
+        alt_route = 0
+    if alt_route_id == None:
+        alt_route_id = 0
+    if new_id == None:
+        new_id == id
+    if new_route == None:
+        new_route = route_id
+    json_string = { 'new_id': int(new_id), 'new_route': int(new_route),'name': name, 'angle': int(angle), 'distance': float(distance), 'id': int(id), 'Route_id': int(route_id), 'alt_route': int(alt_route), 'alt_route_id': int(alt_route_id)}
     requests.put(api_url+"/route/update", json=json_string)
     return redirect('/')
 
 @app.route('/roll/route/<route_id>')
-
-
-
 def roll_route(route_id):
+    print(my_sphero)
     json_string = { 'route_id': int(route_id) }
     response = requests.get(api_url+"/route/by_id", json=json_string)
     route_data = response.json()
-    route = []
-    counter = 0
-    # try:
+    stop_check = False
+    for i in stop_at_checkpoints:
+        i = int(i)
+    print(stop_at_checkpoints)
+    route_data.sort(key=get_step_id)
     for i in route_data:
-        # if route != []:
-        #     if i['angle'] == route[-1]['heading']:
-        #         route[-1]['distance'] += i['distance']
-        #         print('toevoegen', route)
-        #     else:
-        #         route.append({
-        #             "step": i['id'],
-        #             "distance": i['distance'],
-        #             "heading": i['angle']
-        #         })
-        # else:
-        route.append({
-            "step": i['id'],
-            "distance": i['distance'],
-            "heading": i['angle']
-        })
-        route.sort(key=get_step)
-    # except:
-    #     print('Empty route')
-    print(route)
+        if rolling_route != []:
+            if i['angle'] == rolling_route[len(rolling_route)-1]['heading']:
+                if stop_at_checkpoints.__contains__(str(i['id'])):
+                    rolling_route.append({
+                        "step": i['id'],
+                        "distance": i['distance'],
+                        "heading": i['angle']
+                    })
+                else:
+                    rolling_route[-1]['distance'] += i['distance']
+
+            else:
+                rolling_route.append({
+                    "step": i['id'],
+                    "distance": i['distance'],
+                    "heading": i['angle']
+                })
+
+        else:
+            rolling_route.append({
+                "step": i['id'],
+                "distance": i['distance'],
+                "heading": i['angle']
+            })
+        print(str(i['id']) + " | " + str(i['alt_route']))
+        if int(i['alt_route']) != 0:
+            if stop_at_checkpoints != []:
+                if int(i['id']) >= int(max(stop_at_checkpoints)):
+                    return roll_route(str(i['alt_route']))
+
+    rolling_route.sort(key=get_step)
     
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
     loop.set_debug(True)
-    loop.run_until_complete(sphero_roll(my_sphero, route))
+    loop.run_until_complete(sphero_roll(my_sphero, rolling_route))
+    stop_at_checkpoints.clear()
+    rolling_route.clear()
     return redirect('/')
+    
+
 
 # def jimmy(route_id)
 #     json_string = { 'route_id': int(route_id) }
@@ -312,14 +351,14 @@ async def from_mic():
 @app.route('/set/checkpoint/<checkpoint>')
 def add_checkpoint(checkpoint):
     if stop_at_checkpoints.__contains__(checkpoint) == False:
-        stop_at_checkpoints.append(checkpoint)
+        stop_at_checkpoints.append(int(checkpoint))
         print(stop_at_checkpoints)
     return redirect('/')
 
 @app.route('/remove/checkpoint/<checkpoint>')
 def remove_checkpoint(checkpoint):
-    if stop_at_checkpoints.__contains__(checkpoint):
-        stop_at_checkpoints.remove(checkpoint)
+    if stop_at_checkpoints.__contains__(int(checkpoint)):
+        stop_at_checkpoints.remove(int(checkpoint))
         print(stop_at_checkpoints)
     return redirect('/')
 
@@ -332,5 +371,7 @@ def empty_element_detected(e):
     return render_template('error-handle.html')
 
 if __name__ == "__main__":
-  app.debug = True
-  app.run()
+    app.debug = True
+    app.run()
+    rolling_route = []
+    my_sphero = None
