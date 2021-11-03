@@ -133,18 +133,13 @@
                     
         // This runs when the speech recognition service starts
         recognition.onstart = function() {
-            if (counter == 0) {
-                counter += 1
-                $('#speech').css({
-                    'visibility': 'visible'
-                });
-                $('#no-speech').css({
-                    'visibility': 'hidden'
-                });
-                console.log("We are listening. Try speaking into the microphone.");
-            } else {
-                counter = 0
-            }
+            $('#speech').css({
+                'visibility': 'visible'
+            });
+            $('#no-speech').css({
+                'visibility': 'hidden'
+            });
+            console.log("We are listening. Try speaking into the microphone.");
         };
 
         recognition.onspeechend = function() {
@@ -196,22 +191,28 @@
                     return
                 }
             }
-        }
-        recognition.start();
-        // start recognition
-        
-    }
-
-    $(function() {
-        $('#speech').on('click', function(e) {
             $('#speech').css({
                 'visibility': 'hidden'
             });
             $('#no-speech').css({
                 'visibility': 'visible'
             });
-        })
-    })
+        }
+        recognition.start();
+        // start recognition
+        
+    }
+
+    // $(function() {
+    //     $('#speech').on('click', function(e) {
+            // $('#speech').css({
+            //     'visibility': 'hidden'
+            // });
+            // $('#no-speech').css({
+            //     'visibility': 'visible'
+            // });
+    //     })
+    // })
 
     $(function() {
         $('#no-speech').on('click', function(e) {
@@ -262,13 +263,13 @@
                 <div class='wrapper'>
                     <div class="md-form mt-0" style='padding-right: 5px; width: 100%;'>
                         <div style="width: 100%">
-                            <span id='speech' onclick='speech_roll(`{{routes}}`)'  class="iconify speech" data-icon="ant-design:audio-filled" style="color: #1aa9d9;" data-width="32" data-height="32" style="visibility: 'hidden';"></span>
+                            <span id='speech' class="iconify speech" data-icon="ant-design:audio-filled" style="color: #1aa9d9;" data-width="32" data-height="32" style="visibility: 'hidden';"></span>
                             <span id='no-speech' onclick='speech_roll(`{{routes}}`)' class="iconify" data-icon="ant-design:audio-muted-outlined" style="color: gray;" data-width="32" data-height="32" style="visibility: 'visible';"></span>
                             <!-- <div style="padding-right: 10px; width: 100%; float: left; display: inline;">
                                 <span class="iconify material-icons mdc-button__icon" data-icon="ant-design:search-outlined"></span>
                                 <input placeholder="Search locations..." aria-label="Search" class="form-control"  type="text" style='width: 80%; height: 40px;'>
                             </div> -->
-                            <button class='blueButton' type="button" data-toggle="modal" data-target="#createrouteModal" style='padding-left: 10px; height: 40px;  float: left; display: inline; position: fixed; right: 25px'>+ Add route </button>
+                            <button class='blueButton' type="button" data-toggle="modal" data-target="#createrouteModal" style='padding-left: 10px; height: 40px;  float: left; display: inline; position: fixed; right: 25px'>+ Add</button>
                         </div>
                     </div><br>
                 </div>
