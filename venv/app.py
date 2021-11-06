@@ -204,8 +204,11 @@ def create_user(username, password):
 def route():
     response = requests.get(api_url+"/route")
     json_string = response.json()
-    json_string.sort(key=get_step_id)
-    json_string.sort(key=get_route)
+    if json_string != None:
+        json_string.sort(key=get_step_id)
+        json_string.sort(key=get_route)
+    else:
+        json_string = []
     return render_template("full-route.html", routes = json_string, stop_at_checkpoints = stop_at_checkpoints, run_route = run_route)
 
 @app.route('/route/create/<route_id>/<id>/<name>/<angle>/<distance>/<alt_route>/<alt_route_id>', methods=['GET','POST'])
@@ -340,13 +343,13 @@ def remove_checkpoint(checkpoint):
         print(stop_at_checkpoints)
     return redirect('/')
 
-@app.errorhandler(404)
-def page_not_found(e):
-    return redirect('/')
+# @app.errorhandler(404)
+# def page_not_found(e):
+#     return redirect('/')
 
-@app.errorhandler(500)
-def empty_element_detected(e):
-    return render_template('error-handle.html')
+# @app.errorhandler(500)
+# def empty_element_detected(e):
+#     return render_template('error-handle.html')
 
 if __name__ == "__main__":
     app.debug = True
