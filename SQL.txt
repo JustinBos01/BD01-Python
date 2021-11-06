@@ -1,0 +1,19 @@
+-- Table: public.full_route
+
+-- DROP TABLE public.full_route;
+
+CREATE TABLE public.full_route
+(
+    id bigint NOT NULL,
+    route_id bigint NOT NULL,
+    name text COLLATE pg_catalog."default" NOT NULL,
+    angle integer NOT NULL,
+    distance double precision NOT NULL,
+    alt_route bigint,
+    alt_route_id bigint
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE public.full_route
+    OWNER to postgres;
