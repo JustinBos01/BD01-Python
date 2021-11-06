@@ -1,6 +1,5 @@
 import json
 from flask import Flask, request, render_template, redirect, url_for
-from flask_modals import Modal
 import requests
 import sys
 #sys.path.append('C:/Users/31638/Documents/GitHub/BD01-Python/venv/Include/Sphero_Bolt_Multiplatform_Python_Bleak-master/sphero_bolt.py')
@@ -8,11 +7,9 @@ import asyncio
 import math
 from typing import Dict
 from sphero_bolt import SpheroBolt
-import azure.cognitiveservices.speech as speechsdk
 
 
 app =  Flask(__name__)
-modal = Modal(app)
 api_url = "http://localhost:8080"
 
 rolling_route = []
@@ -325,27 +322,6 @@ def roll_workspace(workspace_id):
     #asyncio.set_event_loop(loop)
     #loop.set_debug(True)
     #loop.run_until_complete(calculate_distance(my_sphero, route))
-    return redirect('/')
-
-@app.route('/speech')
-async def from_mic():
-    speech_config = speechsdk.SpeechConfig(subscription="<paste-your-speech-key-here>", region="<paste-your-speech-location/region-here>")
-    speech_recognizer = speechsdk.SpeechRecognizer(speech_config=speech_config)
-    speech_config.speech_recognition_language="en-US"
-    
-    print("Speak into your microphone.")
-    result = speech_recognizer.recognize_once_async().get()
-    print(result.text)
-    if result.reason == speechsdk.ResultReason.RecognizedSpeech:
-        print("Recognized: {}".format(result.text))
-    elif result.reason == speechsdk.ResultReason.NoMatch:
-        print("No speech could be recognized: {}".format(result.no_match_details))
-    elif result.reason == speechsdk.ResultReason.Canceled:
-        cancellation_details = result.cancellation_details
-        print("Speech Recognition canceled: {}".format(cancellation_details.reason))
-        if cancellation_details.reason == speechsdk.CancellationReason.Error:
-            print("Error details: {}".format(cancellation_details.error_details))
-    await asyncio.sleep(10)
     return redirect('/')
 
 @app.route('/set/checkpoint/<checkpoint>')
