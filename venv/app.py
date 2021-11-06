@@ -19,8 +19,8 @@ run_route = 0
 
 # #C8:A9:B8:65:67:EA
 address = (
-    "D0:56:BC:B1:69:8B"
-    #"DD:E6:08:45:EA:7D"
+    #"D0:56:BC:B1:69:8B"
+    "DD:E6:08:45:EA:7D"
 )
 
 # connect to sphero bolt
@@ -38,6 +38,7 @@ async def sphero_roll(my_sphero, actions):
     await my_sphero.connect()
     await my_sphero.wake()
     await my_sphero.resetYaw()
+    print(actions)
 
     for i in actions:
         checkpoint = i['step']
@@ -47,7 +48,6 @@ async def sphero_roll(my_sphero, actions):
             next_heading = actions[action_nr]['heading']
                 
         while distance > 0:
-            
             if i['heading'] == next_heading or distance >= 0.695 + 0.49:
                 if distance >= 0.695:
                     time = int(distance//0.695)
@@ -81,7 +81,7 @@ async def sphero_roll(my_sphero, actions):
             
             else:
                 distance = 0
-        # print(stop_at_checkpoints)
+        print(i['step'])
         if (stop_at_checkpoints.__contains__(checkpoint)):
             await asyncio.sleep(5)
             print('stop')
@@ -97,6 +97,7 @@ async def sphero_roll(my_sphero, actions):
             await asyncio.sleep(2)
             await my_sphero.roll(65, heading)
             await asyncio.sleep(2)
+            action_nr += 1
         
         
     await my_sphero.disconnect()
@@ -249,10 +250,11 @@ def roll_route(route_id):
         i = int(i)
     print(stop_at_checkpoints)
     route_data.sort(key=get_step_id)
+    print(route_data)
     for i in route_data:
         if rolling_route != []:
             if i['angle'] == rolling_route[len(rolling_route)-1]['heading']:
-                if stop_at_checkpoints.__contains__(str(i['id'])):
+                if stop_at_checkpoints.__contains__(int(i['id'])):
                     rolling_route.append({
                         "step": i['id'],
                         "distance": i['distance'],
