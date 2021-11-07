@@ -46,11 +46,11 @@ type ById struct {
 }
 
 const (
-	host     = "127.0.0.1"
-	port     = 5432
-	user     = "postgres"
-	password = "Roy040571"
-	dbname   = "SpheroDSR"
+	host     = "" // Hier de host (waarschijnlijk 127.0.0.1)
+	port     = 0  // Hier de port (waarschijnlijk 5432)
+	user     = "" // Hier de username (waarschijnlijk postgres)
+	password = "" // Hier uw wachtwoord
+	dbname   = "" // Hier de database naam
 )
 
 func OpenConnection() *sql.DB {
